@@ -72,6 +72,21 @@ public class TransitService : ITransitService
     return await _transitRepository.Save(transit);
   }
 
+  public async Task CancelTransit(long? transitId)
+  {
+    var transit = await _transitRepository.Find(transitId);
+
+    if (transit == null)
+    {
+      throw new ArgumentException("Transit does not exist, id = " + transitId);
+    }
+
+    transit.Status = Transit.Statuses.Cancelled;
+    transit.Driver = null;
+    transit.Km = 0;
+    await _transitRepository.Save(transit);
+  }
+
   public async Task<TransitDto> LoadTransit(long? id)
   {
     return new TransitDto(await _transitRepository.Find(id));

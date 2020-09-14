@@ -14,6 +14,7 @@ public class Transit : BaseEntity
   public enum Statuses
   {
     Draft,
+    Cancelled,
     Completed
   }
 

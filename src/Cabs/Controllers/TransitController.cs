@@ -28,4 +28,11 @@ public class TransitController
     var transit = await _transitService.CreateTransit(transitDto);
     return await _transitService.LoadTransit(transit.Id);
   }
+
+  [HttpPost("/transits/{id}/cancel")]
+  public async Task<TransitDto> Cancel(long? id)
+  {
+    await _transitService.CancelTransit(id);
+    return await _transitService.LoadTransit(id);
+  }
 }
