@@ -16,6 +16,7 @@ public class SqLiteDbContext : DbContext
   public DbSet<Address> Addresses { get; set; }
   public DbSet<Client> Clients { get; set; }
   public DbSet<Driver> Drivers { get; set; }
+  public DbSet<DriverSession> DriverSessions { get; set; }
   public DbSet<Transit> Transits { get; set; }
 
   public static DbConnection CreateInMemoryDatabase()
@@ -60,6 +61,14 @@ public class SqLiteDbContext : DbContext
       e.Property(d => d.Type).HasConversion<string>();
       e.Property(d => d.DriverLicense).IsRequired();
       e.HasMany(d => d.Transits).WithOne(t => t.Driver);
+    });
+    modelBuilder.Entity<DriverSession>(builder =>
+    {
+      builder.MapBaseEntityProperties();
+      builder.Property(x => x.LoggedAt).HasConversion(instantConverter).IsRequired();
+      builder.Property(x => x.LoggedOutAt).HasConversion(instantConverter);
+      builder.Property(x => x.PlatesNumber).IsRequired();
+      builder.HasOne(s => s.Driver);
     });
     modelBuilder.Entity<Transit>(builder =>
     {

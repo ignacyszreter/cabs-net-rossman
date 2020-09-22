@@ -10,6 +10,7 @@ builder.Services.AddSingleton(_ => SqLiteDbContext.CreateInMemoryDatabase());
 builder.Services.AddDbContext<SqLiteDbContext>();
 builder.Services.AddTransient<IAddressRepositoryInterface, EfCoreAddressRepository>();
 builder.Services.AddTransient<IDriverRepository, EfCoreDriverRepository>();
+builder.Services.AddTransient<IDriverSessionRepository, EfCoreDriverSessionRepository>();
 builder.Services.AddTransient<IClientRepository, EfCoreClientRepository>();
 builder.Services.AddTransient<ITransitRepository, EfCoreTransitRepository>();
 builder.Services.AddTransient<IClientService, ClientService>();
