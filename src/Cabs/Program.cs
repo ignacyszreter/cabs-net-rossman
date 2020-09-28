@@ -16,6 +16,7 @@ builder.Services.AddTransient<IClientRepository, EfCoreClientRepository>();
 builder.Services.AddTransient<ITransitRepository, EfCoreTransitRepository>();
 builder.Services.AddTransient<IClientService, ClientService>();
 builder.Services.AddTransient<IDriverService, DriverService>();
+builder.Services.AddTransient<IDriverTrackingService, DriverTrackingService>();
 builder.Services.AddTransient<IDriverSessionService, DriverSessionService>();
 builder.Services.AddTransient<IGeocodingService, GeocodingService>();
 builder.Services.AddTransient<ITransitService, TransitService>();
