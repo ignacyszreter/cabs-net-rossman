@@ -16,6 +16,7 @@ public class SqLiteDbContext : DbContext
   public DbSet<Address> Addresses { get; set; }
   public DbSet<Client> Clients { get; set; }
   public DbSet<Driver> Drivers { get; set; }
+  public DbSet<DriverPosition> DriverPositions { get; set; }
   public DbSet<DriverSession> DriverSessions { get; set; }
   public DbSet<Transit> Transits { get; set; }
 
@@ -61,6 +62,14 @@ public class SqLiteDbContext : DbContext
       e.Property(d => d.Type).HasConversion<string>();
       e.Property(d => d.DriverLicense).IsRequired();
       e.HasMany(d => d.Transits).WithOne(t => t.Driver);
+    });
+    modelBuilder.Entity<DriverPosition>(builder =>
+    {
+      builder.MapBaseEntityProperties();
+      builder.HasOne(p => p.Driver);
+      builder.Property(p => p.Latitude).IsRequired();
+      builder.Property(p => p.Longitude).IsRequired();
+      builder.Property(p => p.SeenAt).HasConversion(instantConverter).IsRequired();
     });
     modelBuilder.Entity<DriverSession>(builder =>
     {
