@@ -26,6 +26,11 @@ public class DriverTrackingService : IDriverTrackingService
       throw new ArgumentException("Driver does not exists, id = " + driverId);
     }
 
+    if (driver.Status != Driver.Statuses.Active)
+    {
+      throw new InvalidOperationException("Driver is not active, cannot register position, id = " + driverId);
+    }
+
     var position = new DriverPosition
     {
       Driver = driver,
