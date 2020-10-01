@@ -7,6 +7,7 @@ namespace LegacyFighter.Cabs.Repository;
 
 public interface IDriverPositionRepository
 {
+  Task<List<DriverPosition>> FindByDriverAndSeenAtBetweenOrderBySeenAtAsc(Driver driver, Instant @from, Instant to);
   Task<DriverPosition> Save(DriverPosition position);
 }
 
@@ -17,6 +18,16 @@ internal class EfCoreDriverPositionRepository : IDriverPositionRepository
   public EfCoreDriverPositionRepository(SqLiteDbContext context)
   {
     _context = context;
+  }
+
+  public async Task<List<DriverPosition>> FindByDriverAndSeenAtBetweenOrderBySeenAtAsc(Driver driver, Instant @from,
+    Instant to)
+  {
+    return await _context.DriverPositions.Where(
+        d => d.Driver == driver && 
+             d.SeenAt >= from && 
+             d.SeenAt <= to)
+      .ToListAsync();
   }
 
   public async Task<DriverPosition> Save(DriverPosition position)
