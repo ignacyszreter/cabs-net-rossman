@@ -66,7 +66,7 @@ public class TransitService : ITransitService
     transit.From = @from;
     transit.To = to;
     transit.Status = Transit.Statuses.Draft;
-    transit.DateTime = SystemClock.Instance.GetCurrentInstant();
+    transit.DateTime = _clock.GetCurrentInstant();
     transit.Km = (float)_distanceCalculator.CalculateByMap(geoFrom[0], geoFrom[1], geoTo[0], geoTo[1]);
 
     return await _transitRepository.Save(transit);
