@@ -35,4 +35,18 @@ public class TransitController
     await _transitService.CancelTransit(id);
     return await _transitService.LoadTransit(id);
   }
+
+  [HttpPost("/transits/{id}/publish")]
+  public async Task<TransitDto> PublishTransit(long? id)
+  {
+    await _transitService.PublishTransit(id);
+    return await _transitService.LoadTransit(id);
+  }
+
+  [HttpPost("/transits/{id}/findDrivers")]
+  public async Task<TransitDto> FindDriversForTransit(long? id)
+  {
+    await _transitService.FindDriversForTransit(id);
+    return await _transitService.LoadTransit(id);
+  }
 }

@@ -15,6 +15,8 @@ public class Transit : BaseEntity
   {
     Draft,
     Cancelled,
+    WaitingForDriverAssignment,
+    DriverAssignmentFailed,
     Completed
   }
 
@@ -60,8 +62,11 @@ public class Transit : BaseEntity
 
   public Instant? DateTime { set; get; }
 
+  public Instant? Published { get; set; }
+
   public float Km { get; set; }
 
+  public virtual ISet<Driver> ProposedDrivers { get; set; } = new HashSet<Driver>();
   public virtual Address From { get; set; }
   public virtual Address To { get; set; }
 

@@ -23,14 +23,20 @@ public class TransitDto
     }
 
     Status = transit.Status;
+    foreach (var d in transit.ProposedDrivers) 
+    {
+      ProposedDrivers.Add(new DriverDto(d));
+    }
     To = new AddressDto(transit.To);
     From = new AddressDto(transit.From);
     ClientDto = new ClientDto(transit.Client);
     DateTime = transit.DateTime;
+    Published = transit.Published;
     CompleteAt = transit.CompleteAt;
 
   }
 
+  public List<DriverDto> ProposedDrivers { get; set; } = new();
   public AddressDto To { get; set; }
   public AddressDto From { get; set; }
   public ClientDto ClientDto { get; set; }
@@ -38,5 +44,6 @@ public class TransitDto
   public Transit.Statuses? Status { get; set; }
   public decimal? Price { get; }
   public Instant? DateTime { get; set; }
+  public Instant? Published { get; set; }
   public Instant? CompleteAt { get; set; }
 }

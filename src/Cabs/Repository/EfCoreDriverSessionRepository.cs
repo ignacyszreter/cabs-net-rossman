@@ -8,6 +8,8 @@ namespace LegacyFighter.Cabs.Repository;
 public interface IDriverSessionRepository
 {
 
+  Task<List<DriverSession>> FindAllByLoggedOutAtNullAndDriverIn(ICollection<Driver> drivers);
+
   Task<List<DriverSession>> FindByDriver(Driver driver);
   Task<DriverSession> Save(DriverSession session);
   Task<DriverSession> Find(long sessionId);
@@ -20,6 +22,14 @@ internal class EfCoreDriverSessionRepository : IDriverSessionRepository
   public EfCoreDriverSessionRepository(SqLiteDbContext context)
   {
     _context = context;
+  }
+
+  public async Task<List<DriverSession>> FindAllByLoggedOutAtNullAndDriverIn(ICollection<Driver> drivers)
+  {
+    var driverSessions = await _context.DriverSessions.Where(d =>
+      d.LoggedOutAt == null && drivers.Contains(d.Driver))
+      .ToListAsync();
+    return driverSessions;
   }
 
   public async Task<List<DriverSession>> FindByDriver(Driver driver)
