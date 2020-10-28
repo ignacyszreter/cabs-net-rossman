@@ -82,6 +82,7 @@ public class SqLiteDbContext : DbContext
     modelBuilder.Entity<Transit>(builder =>
     {
       builder.MapBaseEntityProperties();
+      builder.Property(x => x.AcceptedAt).HasConversion(instantConverter);
       builder.Property(x => x.CompleteAt).HasConversion(instantConverter);
       builder.Property(x => x.DateTime).HasConversion(instantConverter);
       builder.Property(x => x.Date).HasConversion(instantConverter);
@@ -90,6 +91,7 @@ public class SqLiteDbContext : DbContext
       builder.HasOne(t => t.Client);
       builder.HasOne(t => t.Driver).WithMany(d => d.Transits);
       builder.HasMany(t => t.ProposedDrivers).WithMany(d => d.ProposingTransits);
+      builder.HasMany(t => t.DriversRejections).WithMany(d => d.RejectingTransits);
     });
   }
 }

@@ -17,6 +17,7 @@ public class Transit : BaseEntity
     Cancelled,
     WaitingForDriverAssignment,
     DriverAssignmentFailed,
+    TransitToPassenger,
     Completed
   }
 
@@ -66,7 +67,10 @@ public class Transit : BaseEntity
 
   public float Km { get; set; }
 
+  public int AwaitingDriversResponses { get; set; } = 0;
+  public virtual ISet<Driver> DriversRejections { get; set; } = new HashSet<Driver>();
   public virtual ISet<Driver> ProposedDrivers { get; set; } = new HashSet<Driver>();
+  public Instant? AcceptedAt { get; set; }
   public virtual Address From { get; set; }
   public virtual Address To { get; set; }
 

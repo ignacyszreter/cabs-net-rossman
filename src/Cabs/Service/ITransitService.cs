@@ -11,5 +11,7 @@ public interface ITransitService
   Task CancelTransit(long? transitId);
   Task<Transit> PublishTransit(long? transitId);
   Task<Transit> FindDriversForTransit(long? transitId);
+  Task AcceptTransit(long? driverId, long? transitId);
+  Task RejectTransit(long? driverId, long? transitId);
   Task<TransitDto> LoadTransit(long? id);
 }

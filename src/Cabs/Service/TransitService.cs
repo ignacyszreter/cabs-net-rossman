@@ -90,6 +90,7 @@ public class TransitService : ITransitService
     transit.Status = Transit.Statuses.Cancelled;
     transit.Driver = null;
     transit.Km = 0;
+    transit.AwaitingDriversResponses = 0;
     await _transitRepository.Save(transit);
   }
 
@@ -125,6 +126,12 @@ public class TransitService : ITransitService
 
         while (true)
         {
+          if (transit.AwaitingDriversResponses
+              > 4)
+          {
+            return transit;
+          }
+
           distanceToCheck++;
 
           // TODO FIXME: to refactor when the final business logic will be determined
@@ -139,6 +146,7 @@ public class TransitService : ITransitService
             transit.Status = Transit.Statuses.DriverAssignmentFailed;
             transit.Driver = null;
             transit.Km = 0;
+            transit.AwaitingDriversResponses = 0;
             await _transitRepository.Save(transit);
             return transit;
           }
@@ -197,7 +205,11 @@ public class TransitService : ITransitService
               var driver = driverAvgPosition.Driver;
               if (driver.Status == Driver.Statuses.Active)
               {
-                transit.ProposedDrivers.Add(driver);
+                if (!transit.DriversRejections.Contains(driver))
+                {
+                  transit.ProposedDrivers.Add(driver);
+                  transit.AwaitingDriversResponses = transit.AwaitingDriversResponses + 1;
+                }
               }
               else
               {
@@ -225,6 +237,68 @@ public class TransitService : ITransitService
       throw new ArgumentException("Transit does not exist, id = " + transitId);
     }
 
+  }
+
+  public async Task AcceptTransit(long? driverId, long? transitId)
+  {
+    var driver = await _driverRepository.Find(driverId);
+
+    if (driver == null)
+    {
+      throw new ArgumentException("Driver does not exist, id = " + driverId);
+    }
+    else
+    {
+      var transit = await _transitRepository.Find(transitId);
+
+      if (transit == null)
+      {
+        throw new ArgumentException("Transit does not exist, id = " + transitId);
+      }
+      else
+      {
+        if (transit.Driver != null)
+        {
+          throw new InvalidOperationException("Transit already accepted, id = " + transitId);
+        }
+        else
+        {
+          if (!transit.ProposedDrivers.Contains(driver))
+          {
+            throw new InvalidOperationException("Driver out of possible drivers, id = " + transitId);
+          }
+          else
+          {
+            transit.Driver = driver;
+            transit.AwaitingDriversResponses = 0;
+            transit.AcceptedAt = _clock.GetCurrentInstant();
+            transit.Status = Transit.Statuses.TransitToPassenger;
+            await _transitRepository.Save(transit);
+          }
+        }
+      }
+    }
+  }
+
+  public async Task RejectTransit(long? driverId, long? transitId)
+  {
+    var driver = await _driverRepository.Find(driverId);
+
+    if (driver == null)
+    {
+      throw new ArgumentException("Driver does not exist, id = " + driverId);
+    }
+
+    var transit = await _transitRepository.Find(transitId);
+
+    if (transit == null)
+    {
+      throw new ArgumentException("Transit does not exist, id = " + transitId);
+    }
+
+    transit.DriversRejections.Add(driver);
+    transit.AwaitingDriversResponses = transit.AwaitingDriversResponses - 1;
+    await _transitRepository.Save(transit);
   }
 
   public async Task<TransitDto> LoadTransit(long? id)

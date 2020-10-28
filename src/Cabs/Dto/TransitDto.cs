@@ -32,6 +32,7 @@ public class TransitDto
     ClientDto = new ClientDto(transit.Client);
     DateTime = transit.DateTime;
     Published = transit.Published;
+    AcceptedAt = transit.AcceptedAt;
     CompleteAt = transit.CompleteAt;
 
   }
@@ -45,5 +46,6 @@ public class TransitDto
   public decimal? Price { get; }
   public Instant? DateTime { get; set; }
   public Instant? Published { get; set; }
+  public Instant? AcceptedAt { get; set; }
   public Instant? CompleteAt { get; set; }
 }
