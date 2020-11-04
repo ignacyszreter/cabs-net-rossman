@@ -33,6 +33,7 @@ public class TransitDto
     DateTime = transit.DateTime;
     Published = transit.Published;
     AcceptedAt = transit.AcceptedAt;
+    Started = transit.Started;
     CompleteAt = transit.CompleteAt;
 
   }
@@ -47,5 +48,6 @@ public class TransitDto
   public Instant? DateTime { get; set; }
   public Instant? Published { get; set; }
   public Instant? AcceptedAt { get; set; }
+  public Instant? Started { get; set; }
   public Instant? CompleteAt { get; set; }
 }

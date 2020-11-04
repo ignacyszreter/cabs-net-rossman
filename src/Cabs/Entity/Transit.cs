@@ -18,6 +18,7 @@ public class Transit : BaseEntity
     WaitingForDriverAssignment,
     DriverAssignmentFailed,
     TransitToPassenger,
+    InTransit,
     Completed
   }
 
@@ -71,6 +72,7 @@ public class Transit : BaseEntity
   public virtual ISet<Driver> DriversRejections { get; set; } = new HashSet<Driver>();
   public virtual ISet<Driver> ProposedDrivers { get; set; } = new HashSet<Driver>();
   public Instant? AcceptedAt { get; set; }
+  public Instant? Started { get; set; }
   public virtual Address From { get; set; }
   public virtual Address To { get; set; }
 

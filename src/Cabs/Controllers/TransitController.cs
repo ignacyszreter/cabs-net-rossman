@@ -57,10 +57,24 @@ public class TransitController
     return await _transitService.LoadTransit(id);
   }
 
+  [HttpPost("/transits/{id}/start/{driverId}")]
+  public async Task<TransitDto> Start(long? id,long? driverId)
+  {
+    await _transitService.StartTransit(driverId, id);
+    return await _transitService.LoadTransit(id);
+  }
+
   [HttpPost("/transits/{id}/reject/{driverId}")]
   public async Task<TransitDto> Reject(long? id,long? driverId)
   {
     await _transitService.RejectTransit(driverId, id);
+    return await _transitService.LoadTransit(id);
+  }
+
+  [HttpPost("/transits/{id}/complete/{driverId}")]
+  public async Task<TransitDto> Complete(long? id,long? driverId, [FromBody] AddressDto destination)
+  {
+    await _transitService.CompleteTransit(driverId, id, destination);
     return await _transitService.LoadTransit(id);
   }
 }

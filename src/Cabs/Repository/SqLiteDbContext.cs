@@ -87,6 +87,7 @@ public class SqLiteDbContext : DbContext
       builder.Property(x => x.DateTime).HasConversion(instantConverter);
       builder.Property(x => x.Date).HasConversion(instantConverter);
       builder.Property(x => x.Published).HasConversion(instantConverter);
+      builder.Property(x => x.Started).HasConversion(instantConverter);
       builder.HasOne(t => t.To);
       builder.HasOne(t => t.Client);
       builder.HasOne(t => t.Driver).WithMany(d => d.Transits);

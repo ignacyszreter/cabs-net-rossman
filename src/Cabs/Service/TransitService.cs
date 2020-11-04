@@ -280,6 +280,32 @@ public class TransitService : ITransitService
     }
   }
 
+  public async Task StartTransit(long? driverId, long? transitId)
+  {
+    var driver = _driverRepository.Find(driverId);
+
+    if (driver == null)
+    {
+      throw new ArgumentException("Driver does not exist, id = " + driverId);
+    }
+
+    var transit = await _transitRepository.Find(transitId);
+
+    if (transit == null)
+    {
+      throw new ArgumentException("Transit does not exist, id = " + transitId);
+    }
+
+    if (transit.Status != Transit.Statuses.TransitToPassenger)
+    {
+      throw new InvalidOperationException("Transit cannot be started, id = " + transitId);
+    }
+
+    transit.Status = Transit.Statuses.InTransit;
+    transit.Started = _clock.GetCurrentInstant();
+    await _transitRepository.Save(transit);
+  }
+
   public async Task RejectTransit(long? driverId, long? transitId)
   {
     var driver = await _driverRepository.Find(driverId);
@@ -298,6 +324,40 @@ public class TransitService : ITransitService
 
     transit.DriversRejections.Add(driver);
     transit.AwaitingDriversResponses = transit.AwaitingDriversResponses - 1;
+    await _transitRepository.Save(transit);
+  }
+
+  public async Task CompleteTransit(long? driverId, long? transitId, AddressDto destinationAddress)
+  {
+    await CompleteTransit(driverId, transitId, destinationAddress.ToAddressEntity());
+  }
+
+  public async Task CompleteTransit(long? driverId, long? transitId, Address destinationAddress)
+  {
+    destinationAddress = await _addressRepository.Save(destinationAddress);
+    var driver = await _driverRepository.Find(driverId);
+
+    if (driver == null)
+    {
+      throw new ArgumentException("Driver does not exist, id = " + driverId);
+    }
+
+    var transit = await _transitRepository.Find(transitId);
+
+    if (transit == null)
+    {
+      throw new ArgumentException("Transit does not exist, id = " + transitId);
+    }
+
+    // TODO FIXME later: add some exceptions handling
+    var geoFrom = _geocodingService.GeocodeAddress(transit.From);
+    var geoTo = _geocodingService.GeocodeAddress(transit.To);
+
+    transit.To = destinationAddress;
+    transit.Km = (float)_distanceCalculator.CalculateByMap(geoFrom[0], geoFrom[1], geoTo[0], geoTo[1]);
+    transit.Status = Transit.Statuses.Completed;
+    transit.CalculateFinalCosts();
+    transit.CompleteTransitAt(_clock.GetCurrentInstant());
     await _transitRepository.Save(transit);
   }
 
