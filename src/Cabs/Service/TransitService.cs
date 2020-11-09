@@ -349,16 +349,23 @@ public class TransitService : ITransitService
       throw new ArgumentException("Transit does not exist, id = " + transitId);
     }
 
-    // TODO FIXME later: add some exceptions handling
-    var geoFrom = _geocodingService.GeocodeAddress(transit.From);
-    var geoTo = _geocodingService.GeocodeAddress(transit.To);
+    if (transit.Status == Transit.Statuses.InTransit)
+    {
+      // TODO FIXME later: add some exceptions handling
+      var geoFrom = _geocodingService.GeocodeAddress(transit.From);
+      var geoTo = _geocodingService.GeocodeAddress(transit.To);
 
-    transit.To = destinationAddress;
-    transit.Km = (float)_distanceCalculator.CalculateByMap(geoFrom[0], geoFrom[1], geoTo[0], geoTo[1]);
-    transit.Status = Transit.Statuses.Completed;
-    transit.CalculateFinalCosts();
-    transit.CompleteTransitAt(_clock.GetCurrentInstant());
-    await _transitRepository.Save(transit);
+      transit.To = destinationAddress;
+      transit.Km = (float)_distanceCalculator.CalculateByMap(geoFrom[0], geoFrom[1], geoTo[0], geoTo[1]);
+      transit.Status = Transit.Statuses.Completed;
+      transit.CalculateFinalCosts();
+      transit.CompleteTransitAt(_clock.GetCurrentInstant());
+      await _transitRepository.Save(transit);
+    }
+    else
+    {
+      throw new ArgumentException("Cannot complete Transit, id = " + transitId);
+    }
   }
 
   public async Task<TransitDto> LoadTransit(long? id)
