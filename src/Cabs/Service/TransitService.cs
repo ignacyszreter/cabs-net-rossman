@@ -78,6 +78,29 @@ public class TransitService : ITransitService
     return await _transitRepository.Save(transit);
   }
 
+  public async Task ChangeTransitAddressTo(long? transitId, AddressDto newAddress)
+  {
+    await ChangeTransitAddressTo(transitId, newAddress.ToAddressEntity());
+  }
+
+  public async Task ChangeTransitAddressTo(long? transitId, Address newAddress)
+  {
+    await _addressRepository.Save(newAddress);
+    var transit = await _transitRepository.Find(transitId);
+
+    if (transit == null)
+    {
+      throw new ArgumentException("Transit does not exist, id = " + transitId);
+    }
+
+    // TODO FIXME later: add some exceptions handling
+    var geoFrom = _geocodingService.GeocodeAddress(transit.From);
+    var geoTo = _geocodingService.GeocodeAddress(newAddress);
+
+    transit.To = newAddress;
+    transit.Km = (float)_distanceCalculator.CalculateByMap(geoFrom[0], geoFrom[1], geoTo[0], geoTo[1]);
+  }
+
   public async Task CancelTransit(long? transitId)
   {
     var transit = await _transitRepository.Find(transitId);

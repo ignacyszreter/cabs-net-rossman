@@ -8,6 +8,8 @@ public interface ITransitService
 {
   Task<Transit> CreateTransit(TransitDto transitDto);
   Task<Transit> CreateTransit(long? clientId, Address from, Address to);
+  Task ChangeTransitAddressTo(long? transitId, AddressDto newAddress);
+  Task ChangeTransitAddressTo(long? transitId, Address newAddress);
   Task CancelTransit(long? transitId);
   Task<Transit> PublishTransit(long? transitId);
   Task<Transit> FindDriversForTransit(long? transitId);
