@@ -36,6 +36,13 @@ public class TransitController
     return await _transitService.LoadTransit(id);
   }
 
+  [HttpPost("/transits/{id}/changeAddressFrom")]
+  public async Task<TransitDto> ChangeAddressFrom(long? id, [FromBody] AddressDto addressDto)
+  {
+    await _transitService.ChangeTransitAddressFrom(id, addressDto);
+    return await _transitService.LoadTransit(id);
+  }
+
   [HttpPost("/transits/{id}/cancel")]
   public async Task<TransitDto> Cancel(long? id)
   {

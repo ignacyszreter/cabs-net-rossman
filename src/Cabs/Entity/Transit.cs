@@ -76,6 +76,8 @@ public class Transit : BaseEntity
   public virtual Address From { get; set; }
   public virtual Address To { get; set; }
 
+  public int PickupAddressChangeCounter { get; set; } = 0;
+
   public override bool Equals(object obj)
   {
     if (ReferenceEquals(this, obj)) return true;

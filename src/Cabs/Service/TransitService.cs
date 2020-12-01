@@ -78,9 +78,65 @@ public class TransitService : ITransitService
     return await _transitRepository.Save(transit);
   }
 
+  public async Task ChangeTransitAddressFrom(long? transitId, Address newAddress)
+  {
+    newAddress = await _addressRepository.Save(newAddress);
+    var transit = await _transitRepository.Find(transitId);
+
+    if (transit == null)
+    {
+      throw new ArgumentException("Transit does not exist, id = " + transitId);
+    }
+
+    // TODO FIXME later: add some exceptions handling
+    var geoFromNew = _geocodingService.GeocodeAddress(newAddress);
+    var geoFromOld = _geocodingService.GeocodeAddress(transit.From);
+
+    // https://www.geeksforgeeks.org/program-distance-two-points-earth/
+    // Using extension method ToRadians which converts from
+    // degrees to radians.
+    var lon1 = geoFromNew[1].ToRadians();
+    var lon2 = geoFromOld[1].ToRadians();
+    var lat1 = geoFromNew[0].ToRadians();
+    var lat2 = geoFromOld[0].ToRadians();
+
+    // Haversine formula
+    var dlon = lon2 - lon1;
+    var dlat = lat2 - lat1;
+    var a = Math.Pow(Math.Sin(dlat / 2), 2)
+            + Math.Cos(lat1) * Math.Cos(lat2)
+                             * Math.Pow(Math.Sin(dlon / 2), 2);
+
+    var c = 2 * Math.Asin(Math.Sqrt(a));
+
+    // Radius of earth in kilometers. Use 3956 for miles
+    double r = 6371;
+
+    // calculate the result
+    var distanceInKMeters = c * r;
+
+    if (!(transit.Status == Transit.Statuses.Draft ||
+          transit.Status == Transit.Statuses.WaitingForDriverAssignment) ||
+        transit.PickupAddressChangeCounter > 2 ||
+        distanceInKMeters > 0.5)
+    {
+      throw new InvalidOperationException("Address 'from' cannot be changed, id = " + transitId);
+    }
+
+    transit.From = newAddress;
+    transit.Km = (float)_distanceCalculator.CalculateByMap(geoFromNew[0], geoFromNew[1], geoFromOld[0], geoFromOld[1]);
+    transit.PickupAddressChangeCounter = transit.PickupAddressChangeCounter + 1;
+    await _transitRepository.Save(transit);
+  }
+
   public async Task ChangeTransitAddressTo(long? transitId, AddressDto newAddress)
   {
     await ChangeTransitAddressTo(transitId, newAddress.ToAddressEntity());
+  }
+
+  public async Task ChangeTransitAddressFrom(long? transitId, AddressDto newAddress)
+  {
+    await ChangeTransitAddressFrom(transitId, newAddress.ToAddressEntity());
   }
 
   public async Task ChangeTransitAddressTo(long? transitId, Address newAddress)
