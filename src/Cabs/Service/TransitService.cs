@@ -118,7 +118,7 @@ public class TransitService : ITransitService
     if (!(transit.Status == Transit.Statuses.Draft ||
           transit.Status == Transit.Statuses.WaitingForDriverAssignment) ||
         transit.PickupAddressChangeCounter > 2 ||
-        distanceInKMeters > 0.5)
+        distanceInKMeters > 0.25)
     {
       throw new InvalidOperationException("Address 'from' cannot be changed, id = " + transitId);
     }
