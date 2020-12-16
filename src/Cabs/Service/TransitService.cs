@@ -11,6 +11,7 @@ public class TransitService : ITransitService
   private readonly IDriverRepository _driverRepository;
   private readonly ITransitRepository _transitRepository;
   private readonly IClientRepository _clientRepository;
+  private readonly IDriverNotificationService _notificationService;
   private readonly DistanceCalculator _distanceCalculator;
   private readonly IDriverPositionRepository _driverPositionRepository;
   private readonly IDriverSessionRepository _driverSessionRepository;
@@ -22,6 +23,7 @@ public class TransitService : ITransitService
     IDriverRepository driverRepository,
     ITransitRepository transitRepository,
     IClientRepository clientRepository,
+    IDriverNotificationService notificationService,
     DistanceCalculator distanceCalculator,
     IDriverPositionRepository driverPositionRepository,
     IDriverSessionRepository driverSessionRepository,
@@ -32,6 +34,7 @@ public class TransitService : ITransitService
     _driverRepository = driverRepository;
     _transitRepository = transitRepository;
     _clientRepository = clientRepository;
+    _notificationService = notificationService;
     _distanceCalculator = distanceCalculator;
     _driverPositionRepository = driverPositionRepository;
     _driverSessionRepository = driverSessionRepository;
@@ -127,6 +130,11 @@ public class TransitService : ITransitService
     transit.Km = (float)_distanceCalculator.CalculateByMap(geoFromNew[0], geoFromNew[1], geoFromOld[0], geoFromOld[1]);
     transit.PickupAddressChangeCounter = transit.PickupAddressChangeCounter + 1;
     await _transitRepository.Save(transit);
+
+    foreach (var driver in transit.ProposedDrivers) 
+    {
+      _notificationService.NotifyAboutChangedTransitAddress(driver.Id, transitId);
+    }
   }
 
   public async Task ChangeTransitAddressTo(long? transitId, AddressDto newAddress)
@@ -155,6 +163,11 @@ public class TransitService : ITransitService
 
     transit.To = newAddress;
     transit.Km = (float)_distanceCalculator.CalculateByMap(geoFrom[0], geoFrom[1], geoTo[0], geoTo[1]);
+
+    if (transit.Driver != null)
+    {
+      _notificationService.NotifyAboutChangedTransitAddress(transit.Driver.Id, transitId);
+    }
   }
 
   public async Task CancelTransit(long? transitId)
@@ -164,6 +177,11 @@ public class TransitService : ITransitService
     if (transit == null)
     {
       throw new ArgumentException("Transit does not exist, id = " + transitId);
+    }
+
+    if (transit.Driver != null)
+    {
+      _notificationService.NotifyAboutCancelledTransit(transit.Driver.Id, transitId);
     }
 
     transit.Status = Transit.Statuses.Cancelled;
@@ -288,6 +306,7 @@ public class TransitService : ITransitService
                 {
                   transit.ProposedDrivers.Add(driver);
                   transit.AwaitingDriversResponses = transit.AwaitingDriversResponses + 1;
+                  _notificationService.NotifyAboutPossibleTransit(driver.Id, transitId);
                 }
               }
               else

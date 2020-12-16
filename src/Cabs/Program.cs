@@ -14,6 +14,7 @@ builder.Services.AddTransient<IDriverSessionRepository, EfCoreDriverSessionRepos
 builder.Services.AddTransient<IDriverPositionRepository, EfCoreDriverPositionRepository>();
 builder.Services.AddTransient<IClientRepository, EfCoreClientRepository>();
 builder.Services.AddTransient<ITransitRepository, EfCoreTransitRepository>();
+builder.Services.AddTransient<IDriverNotificationService, DriverNotificationService>();
 builder.Services.AddTransient<IClientService, ClientService>();
 builder.Services.AddTransient<IDriverService, DriverService>();
 builder.Services.AddTransient<IDriverTrackingService, DriverTrackingService>();
