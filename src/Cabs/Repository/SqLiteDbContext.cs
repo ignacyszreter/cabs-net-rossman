@@ -14,6 +14,7 @@ public class SqLiteDbContext : DbContext
 {
   private readonly DbConnection _connection;
   public DbSet<Address> Addresses { get; set; }
+  public DbSet<CarType> CarTypes { get; set; }
   public DbSet<Client> Clients { get; set; }
   public DbSet<Driver> Drivers { get; set; }
   public DbSet<DriverPosition> DriverPositions { get; set; }
@@ -50,6 +51,12 @@ public class SqLiteDbContext : DbContext
     {
       builder.MapBaseEntityProperties();
       builder.HasIndex(u => u.Hash).IsUnique();
+    });
+    modelBuilder.Entity<CarType>(builder =>
+    {
+      builder.MapBaseEntityProperties();
+      builder.Property(t => t.CarClass).HasConversion<string>().IsRequired();
+      builder.Property(t => t.Status).HasConversion<string>().IsRequired();
     });
     modelBuilder.Entity<Client>(builder =>
     {
