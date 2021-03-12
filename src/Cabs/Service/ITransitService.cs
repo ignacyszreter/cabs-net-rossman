@@ -7,7 +7,7 @@ namespace LegacyFighter.Cabs.Service;
 public interface ITransitService
 {
   Task<Transit> CreateTransit(TransitDto transitDto);
-  Task<Transit> CreateTransit(long? clientId, Address from, Address to);
+  Task<Transit> CreateTransit(long? clientId, Address from, Address to, CarType.CarClasses? carClass);
   Task ChangeTransitAddressFrom(long? transitId, Address newAddress);
   Task ChangeTransitAddressFrom(long? transitId, AddressDto newAddress);
   Task ChangeTransitAddressTo(long? transitId, AddressDto newAddress);

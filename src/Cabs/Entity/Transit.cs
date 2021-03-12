@@ -25,6 +25,7 @@ public class Transit : BaseEntity
   public Instant? Date { get; private set; }
   public const int BaseFee = 9;
 
+  public CarType.CarClasses? CarType { get; set; }
   public virtual Driver Driver { get; set; }
 
   // https://stackoverflow.com/questions/37107123/sould-i-store-price-as-decimal-or-integer-in-mysql

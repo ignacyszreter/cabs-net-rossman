@@ -16,6 +16,7 @@ builder.Services.AddTransient<IClientRepository, EfCoreClientRepository>();
 builder.Services.AddTransient<ITransitRepository, EfCoreTransitRepository>();
 builder.Services.AddTransient<ICarTypeRepository, EfCoreCarTypeRepository>();
 builder.Services.AddTransient<IDriverNotificationService, DriverNotificationService>();
+builder.Services.AddTransient<ICarTypeService, CarTypeService>();
 builder.Services.AddTransient<IClientService, ClientService>();
 builder.Services.AddTransient<IDriverService, DriverService>();
 builder.Services.AddTransient<IDriverTrackingService, DriverTrackingService>();

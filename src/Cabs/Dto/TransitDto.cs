@@ -29,6 +29,7 @@ public class TransitDto
     }
     To = new AddressDto(transit.To);
     From = new AddressDto(transit.From);
+    CarClass = transit.CarType;
     ClientDto = new ClientDto(transit.Client);
     DateTime = transit.DateTime;
     Published = transit.Published;
@@ -41,6 +42,7 @@ public class TransitDto
   public List<DriverDto> ProposedDrivers { get; set; } = new();
   public AddressDto To { get; set; }
   public AddressDto From { get; set; }
+  public CarType.CarClasses? CarClass { get; set; }
   public ClientDto ClientDto { get; set; }
   public long? Id { get; }
   public Transit.Statuses? Status { get; set; }

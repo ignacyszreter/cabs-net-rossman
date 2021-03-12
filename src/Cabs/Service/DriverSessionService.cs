@@ -18,12 +18,13 @@ public class DriverSessionService : IDriverSessionService
     _clock = clock;
   }
 
-  public async Task<DriverSession> LogIn(long? driverId, string plateNumber)
+  public async Task<DriverSession> LogIn(long? driverId, string plateNumber, CarType.CarClasses? carClass)
   {
     var session = new DriverSession
     {
       Driver = await _driverRepository.Find(driverId),
       LoggedAt = _clock.GetCurrentInstant(),
+      CarClass = carClass,
       PlatesNumber = plateNumber
     };
     return await _driverSessionRepository.Save(session);

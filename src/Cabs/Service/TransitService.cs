@@ -15,6 +15,7 @@ public class TransitService : ITransitService
   private readonly DistanceCalculator _distanceCalculator;
   private readonly IDriverPositionRepository _driverPositionRepository;
   private readonly IDriverSessionRepository _driverSessionRepository;
+  private readonly ICarTypeService _carTypeService;
   private readonly IGeocodingService _geocodingService;
   private readonly AddressRepository _addressRepository;
   private readonly IClock _clock;
@@ -27,6 +28,7 @@ public class TransitService : ITransitService
     DistanceCalculator distanceCalculator,
     IDriverPositionRepository driverPositionRepository,
     IDriverSessionRepository driverSessionRepository,
+    ICarTypeService carTypeService,
     IGeocodingService geocodingService,
     AddressRepository addressRepository,
     IClock clock)
@@ -38,6 +40,7 @@ public class TransitService : ITransitService
     _distanceCalculator = distanceCalculator;
     _driverPositionRepository = driverPositionRepository;
     _driverSessionRepository = driverSessionRepository;
+    _carTypeService = carTypeService;
     _geocodingService = geocodingService;
     _addressRepository = addressRepository;
     _clock = clock;
@@ -47,7 +50,7 @@ public class TransitService : ITransitService
   {
     var from = await AddressFromDto(transitDto.From);
     var to = await AddressFromDto(transitDto.To);
-    return await CreateTransit(transitDto.ClientDto.Id, from, to);
+    return await CreateTransit(transitDto.ClientDto.Id, from, to, transitDto.CarClass);
   }
 
   private async Task<Address> AddressFromDto(AddressDto addressDto)
@@ -56,7 +59,7 @@ public class TransitService : ITransitService
     return await _addressRepository.Save(address);
   }
 
-  public async Task<Transit> CreateTransit(long? clientId, Address from, Address to)
+  public async Task<Transit> CreateTransit(long? clientId, Address from, Address to, CarType.CarClasses? carClass)
   {
     var client = await _clientRepository.Find(clientId);
 
@@ -74,6 +77,7 @@ public class TransitService : ITransitService
     transit.Client = client;
     transit.From = @from;
     transit.To = to;
+    transit.CarType = carClass;
     transit.Status = Transit.Statuses.Draft;
     transit.DateTime = _clock.GetCurrentInstant();
     transit.Km = (float)_distanceCalculator.CalculateByMap(geoFrom[0], geoFrom[1], geoTo[0], geoTo[1]);
@@ -286,10 +290,36 @@ public class TransitService : ITransitService
               ));
             driversAvgPositions = driversAvgPositions.Take(20).ToList();
 
+            var carClasses = new List<CarType.CarClasses?>();
+            var activeCarClasses = (await _carTypeService.FindActiveCarClasses())
+              .Select(c => new CarType.CarClasses?(c)).ToList();
+            if (!activeCarClasses.Any())
+            {
+              return transit;
+            }
+
+            if (transit.CarType
+
+                != null)
+            {
+              if (activeCarClasses.Contains(transit.CarType))
+              {
+                carClasses.Add(transit.CarType);
+              }
+              else
+              {
+                return transit;
+              }
+            }
+            else
+            {
+              carClasses.AddRange(activeCarClasses);
+            }
+
             var drivers = driversAvgPositions.Select(p => p.Driver).ToList();
 
             var activeDriverIdsInSpecificCar = (await _driverSessionRepository
-              .FindAllByLoggedOutAtNullAndDriverIn(drivers))
+              .FindAllByLoggedOutAtNullAndDriverInAndCarClassIn(drivers, carClasses))
 
               .Select(ds => ds.Driver.Id).ToList();
 

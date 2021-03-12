@@ -84,6 +84,7 @@ public class SqLiteDbContext : DbContext
       builder.Property(x => x.LoggedAt).HasConversion(instantConverter).IsRequired();
       builder.Property(x => x.LoggedOutAt).HasConversion(instantConverter);
       builder.Property(x => x.PlatesNumber).IsRequired();
+      builder.Property(x => x.CarClass).HasConversion<string>();
       builder.HasOne(s => s.Driver);
     });
     modelBuilder.Entity<Transit>(builder =>
@@ -95,6 +96,7 @@ public class SqLiteDbContext : DbContext
       builder.Property(x => x.Date).HasConversion(instantConverter);
       builder.Property(x => x.Published).HasConversion(instantConverter);
       builder.Property(x => x.Started).HasConversion(instantConverter);
+      builder.Property(x => x.CarType).HasConversion<string>();
       builder.HasOne(t => t.To);
       builder.HasOne(t => t.Client);
       builder.HasOne(t => t.Driver).WithMany(d => d.Transits);

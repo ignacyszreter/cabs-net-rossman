@@ -8,7 +8,8 @@ namespace LegacyFighter.Cabs.Repository;
 public interface IDriverSessionRepository
 {
 
-  Task<List<DriverSession>> FindAllByLoggedOutAtNullAndDriverIn(ICollection<Driver> drivers);
+  Task<List<DriverSession>> FindAllByLoggedOutAtNullAndDriverInAndCarClassIn(ICollection<Driver> drivers,
+    List<CarType.CarClasses?> carClasses);
 
   Task<List<DriverSession>> FindByDriver(Driver driver);
   Task<DriverSession> Save(DriverSession session);
@@ -24,10 +25,11 @@ internal class EfCoreDriverSessionRepository : IDriverSessionRepository
     _context = context;
   }
 
-  public async Task<List<DriverSession>> FindAllByLoggedOutAtNullAndDriverIn(ICollection<Driver> drivers)
+  public async Task<List<DriverSession>> FindAllByLoggedOutAtNullAndDriverInAndCarClassIn(ICollection<Driver> drivers,
+    List<CarType.CarClasses?> carClasses)
   {
     var driverSessions = await _context.DriverSessions.Where(d =>
-      d.LoggedOutAt == null && drivers.Contains(d.Driver))
+      d.LoggedOutAt == null && drivers.Contains(d.Driver) && carClasses.Contains(d.CarClass))
       .ToListAsync();
     return driverSessions;
   }

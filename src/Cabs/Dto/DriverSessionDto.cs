@@ -15,9 +15,11 @@ public class DriverSessionDto
     PlatesNumber = session.PlatesNumber;
     LoggedAt = session.LoggedAt;
     LoggedOutAt = session.LoggedOutAt;
+    CarClass = session.CarClass;
   }
 
   public Instant LoggedAt { get; set; }
   public Instant? LoggedOutAt { get; set; }
   public string PlatesNumber { get; set; }
+  public CarType.CarClasses? CarClass { get; set; }
 }
