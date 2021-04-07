@@ -24,6 +24,20 @@ public class CarTypeController
     return new CarTypeDto(created);
   }
 
+  [HttpPost("/cartypes/{carClass}/registerCar")]
+  public async Task<IActionResult> RegisterCar(CarType.CarClasses carClass)
+  {
+    await _carTypeService.RegisterCar(carClass);
+    return new OkResult();
+  }
+
+  [HttpPost("/cartypes/{carClass}/unregisterCar")]
+  public async Task<IActionResult> UnregisterCar(CarType.CarClasses carClass)
+  {
+    await _carTypeService.UnregisterCar(carClass);
+    return new OkResult();
+  }
+
   [HttpPost("/cartypes/{id}/activate")]
   public async Task<IActionResult> Activate(long? id)
   {

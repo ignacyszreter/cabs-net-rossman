@@ -9,7 +9,9 @@ public class CarTypeDto
     Id = carType.Id;
     CarClass = carType.CarClass;
     Status = carType.Status;
+    CarsCounter = carType.CarsCounter;
     Description = carType.Description;
+    MinNoOfCarsToActivateClass = carType.MinNoOfCarsToActivateClass;
   }
 
   public CarTypeDto()
@@ -20,5 +22,7 @@ public class CarTypeDto
   public long? Id { get; }
   public CarType.CarClasses CarClass { get; set; }
   public CarType.Statuses? Status { get; set; }
+  public int CarsCounter { get; set; }
   public string Description { get; set; }
+  public int MinNoOfCarsToActivateClass { get; set; }
 }

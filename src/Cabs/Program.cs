@@ -1,3 +1,4 @@
+using LegacyFighter.Cabs.Config;
 using LegacyFighter.Cabs.Repository;
 using LegacyFighter.Cabs.Service;
 using NodaTime;
@@ -24,6 +25,7 @@ builder.Services.AddTransient<IDriverSessionService, DriverSessionService>();
 builder.Services.AddTransient<IGeocodingService, GeocodingService>();
 builder.Services.AddTransient<ITransitService, TransitService>();
 builder.Services.AddTransient<DistanceCalculator>();
+builder.Services.AddSingleton<IAppProperties, AppProperties>();
 builder.Services.AddSingleton<IClock>(_ => SystemClock.Instance);
 builder.Services.AddTransient<AddressRepository>();
 builder.Services.AddControllers().AddControllersAsServices();

@@ -9,12 +9,14 @@ public class DriverSessionService : IDriverSessionService
 {
   private readonly IDriverRepository _driverRepository;
   private readonly IDriverSessionRepository _driverSessionRepository;
+  private readonly ICarTypeService _carTypeService;
   private readonly IClock _clock;
 
-  public DriverSessionService(IDriverRepository driverRepository, IDriverSessionRepository driverSessionRepository, IClock clock)
+  public DriverSessionService(IDriverRepository driverRepository, IDriverSessionRepository driverSessionRepository, ICarTypeService carTypeService, IClock clock)
   {
     _driverRepository = driverRepository;
     _driverSessionRepository = driverSessionRepository;
+    _carTypeService = carTypeService;
     _clock = clock;
   }
 
@@ -38,6 +40,7 @@ public class DriverSessionService : IDriverSessionService
       throw new ArgumentException("Session does not exist");
     }
 
+    await _carTypeService.UnregisterCar(session.CarClass);
     session.LoggedOutAt = _clock.GetCurrentInstant();
   }
 

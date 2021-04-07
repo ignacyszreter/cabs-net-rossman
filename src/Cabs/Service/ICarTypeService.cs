@@ -11,5 +11,7 @@ public interface ICarTypeService
   Task<CarType> Create(CarTypeDto carTypeDto);
   Task Activate(long? id);
   Task Deactivate(long? id);
+  Task RegisterCar(CarType.CarClasses carClass);
+  Task UnregisterCar(CarType.CarClasses? carClass);
   Task<List<CarType.CarClasses>> FindActiveCarClasses();
 }
