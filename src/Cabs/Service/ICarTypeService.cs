@@ -14,4 +14,5 @@ public interface ICarTypeService
   Task RegisterCar(CarType.CarClasses carClass);
   Task UnregisterCar(CarType.CarClasses? carClass);
   Task<List<CarType.CarClasses>> FindActiveCarClasses();
+  Task RemoveCarType(CarType.CarClasses carClass);
 }

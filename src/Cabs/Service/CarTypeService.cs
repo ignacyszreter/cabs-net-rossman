@@ -91,6 +91,15 @@ public class CarTypeService : ICarTypeService
     }
   }
 
+  public async Task RemoveCarType(CarType.CarClasses carClass)
+  {
+    var carType = await _carTypeRepository.FindByCarClass(carClass);
+    if (carType != null)
+    {
+      await _carTypeRepository.Delete(carType);
+    }
+  }
+
   private async Task<CarType> FindByCarClass(CarType.CarClasses? carClass)
   {
     var byCarClass = await _carTypeRepository.FindByCarClass(carClass);

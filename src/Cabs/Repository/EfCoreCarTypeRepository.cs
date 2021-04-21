@@ -10,6 +10,7 @@ public interface ICarTypeRepository
   Task<List<CarType>> FindByStatus(CarType.Statuses status);
   Task<CarType> Find(long? id);
   Task<CarType> Save(CarType type);
+  Task Delete(CarType carType);
 }
 
 internal class EfCoreCarTypeRepository : ICarTypeRepository
@@ -41,5 +42,11 @@ internal class EfCoreCarTypeRepository : ICarTypeRepository
     _context.CarTypes.Update(type);
     await _context.SaveChangesAsync();
     return type;
+  }
+
+  public async Task Delete(CarType carType)
+  {
+    _context.CarTypes.Remove(carType);
+    await _context.SaveChangesAsync();
   }
 }
