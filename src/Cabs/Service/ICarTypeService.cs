@@ -13,6 +13,8 @@ public interface ICarTypeService
   Task Deactivate(long? id);
   Task RegisterCar(CarType.CarClasses carClass);
   Task UnregisterCar(CarType.CarClasses? carClass);
+  Task UnregisterActiveCar(CarType.CarClasses carClass);
+  Task RegisterActiveCar(CarType.CarClasses? carClass);
   Task<List<CarType.CarClasses>> FindActiveCarClasses();
   Task RemoveCarType(CarType.CarClasses carClass);
 }

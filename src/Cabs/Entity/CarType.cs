@@ -29,6 +29,16 @@ public class CarType : BaseEntity
   {
   }
 
+  public void RegisterActiveCar()
+  {
+    ActiveCarsCounter++;
+  }
+
+  public void UnregisterActiveCar()
+  {
+    ActiveCarsCounter--;
+  }
+
   public void RegisterCar()
   {
     CarsCounter++;
@@ -58,6 +68,7 @@ public class CarType : BaseEntity
   public string Description { get; set; }
   public Statuses? Status { get; private set; } = Statuses.Inactive;
   public int CarsCounter { get; private set; }
+  public int ActiveCarsCounter { get; private set; }
   public int MinNoOfCarsToActivateClass { get; private set; }
 
   public override bool Equals(object obj)

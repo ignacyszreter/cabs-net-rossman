@@ -59,6 +59,7 @@ public class SqLiteDbContext : DbContext
       builder.Property(t => t.Status).HasConversion<string>().IsRequired();
       builder.Property(t => t.CarsCounter).IsRequired();
       builder.Property(t => t.MinNoOfCarsToActivateClass).IsRequired();
+      builder.Property(t => t.ActiveCarsCounter).IsRequired();
     });
     modelBuilder.Entity<Client>(builder =>
     {

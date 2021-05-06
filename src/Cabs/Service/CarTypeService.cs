@@ -72,6 +72,18 @@ public class CarTypeService : ICarTypeService
     carType.UnregisterCar();
   }
 
+  public async Task UnregisterActiveCar(CarType.CarClasses carClass)
+  {
+    var carType = await FindByCarClass(carClass);
+    carType.UnregisterActiveCar();
+  }
+
+  public async Task RegisterActiveCar(CarType.CarClasses? carClass)
+  {
+    var carType = await FindByCarClass(carClass);
+    carType.RegisterActiveCar();
+  }
+
   public async Task<List<CarType.CarClasses>> FindActiveCarClasses()
   {
     return (await _carTypeRepository.FindByStatus(CarType.Statuses.Active))

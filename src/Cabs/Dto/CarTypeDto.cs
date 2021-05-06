@@ -11,6 +11,7 @@ public class CarTypeDto
     Status = carType.Status;
     CarsCounter = carType.CarsCounter;
     Description = carType.Description;
+    ActiveCarsCounter = carType.ActiveCarsCounter;
     MinNoOfCarsToActivateClass = carType.MinNoOfCarsToActivateClass;
   }
 
@@ -24,5 +25,6 @@ public class CarTypeDto
   public CarType.Statuses? Status { get; set; }
   public int CarsCounter { get; set; }
   public string Description { get; set; }
+  public int ActiveCarsCounter { get; set; }
   public int MinNoOfCarsToActivateClass { get; set; }
 }

@@ -29,6 +29,7 @@ public class DriverSessionService : IDriverSessionService
       CarClass = carClass,
       PlatesNumber = plateNumber
     };
+    await _carTypeService.RegisterActiveCar(session.CarClass);
     return await _driverSessionRepository.Save(session);
   }
 
