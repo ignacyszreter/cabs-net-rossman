@@ -19,6 +19,7 @@ public class SqLiteDbContext : DbContext
   public DbSet<Driver> Drivers { get; set; }
   public DbSet<DriverPosition> DriverPositions { get; set; }
   public DbSet<DriverSession> DriverSessions { get; set; }
+  public DbSet<Invoice> Invoices { get; set; }
   public DbSet<Transit> Transits { get; set; }
 
   public static DbConnection CreateInMemoryDatabase()
@@ -89,6 +90,10 @@ public class SqLiteDbContext : DbContext
       builder.Property(x => x.PlatesNumber).IsRequired();
       builder.Property(x => x.CarClass).HasConversion<string>();
       builder.HasOne(s => s.Driver);
+    });
+    modelBuilder.Entity<Invoice>(builder =>
+    {
+      builder.MapBaseEntityProperties();
     });
     modelBuilder.Entity<Transit>(builder =>
     {
