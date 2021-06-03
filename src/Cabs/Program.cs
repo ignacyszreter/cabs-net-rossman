@@ -25,6 +25,7 @@ builder.Services.AddTransient<IDriverTrackingService, DriverTrackingService>();
 builder.Services.AddTransient<IDriverSessionService, DriverSessionService>();
 builder.Services.AddTransient<IGeocodingService, GeocodingService>();
 builder.Services.AddTransient<ITransitService, TransitService>();
+builder.Services.AddTransient<InvoiceGenerator>();
 builder.Services.AddTransient<DistanceCalculator>();
 builder.Services.AddSingleton<IAppProperties, AppProperties>();
 builder.Services.AddSingleton<IClock>(_ => SystemClock.Instance);

@@ -11,6 +11,7 @@ public class TransitService : ITransitService
   private readonly IDriverRepository _driverRepository;
   private readonly ITransitRepository _transitRepository;
   private readonly IClientRepository _clientRepository;
+  private readonly InvoiceGenerator _invoiceGenerator;
   private readonly IDriverNotificationService _notificationService;
   private readonly DistanceCalculator _distanceCalculator;
   private readonly IDriverPositionRepository _driverPositionRepository;
@@ -24,6 +25,7 @@ public class TransitService : ITransitService
     IDriverRepository driverRepository,
     ITransitRepository transitRepository,
     IClientRepository clientRepository,
+    InvoiceGenerator invoiceGenerator,
     IDriverNotificationService notificationService,
     DistanceCalculator distanceCalculator,
     IDriverPositionRepository driverPositionRepository,
@@ -36,6 +38,7 @@ public class TransitService : ITransitService
     _driverRepository = driverRepository;
     _transitRepository = transitRepository;
     _clientRepository = clientRepository;
+    _invoiceGenerator = invoiceGenerator;
     _notificationService = notificationService;
     _distanceCalculator = distanceCalculator;
     _driverPositionRepository = driverPositionRepository;
@@ -489,6 +492,8 @@ public class TransitService : ITransitService
       transit.CalculateFinalCosts();
       transit.CompleteTransitAt(_clock.GetCurrentInstant());
       await _transitRepository.Save(transit);
+      await _invoiceGenerator.Generate(transit.Price,
+        transit.Client.Name + " " + transit.Client.LastName);
     }
     else
     {
