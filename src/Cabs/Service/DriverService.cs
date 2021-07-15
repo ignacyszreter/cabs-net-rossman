@@ -50,6 +50,11 @@ public class DriverService : IDriverService
       throw new ArgumentException("Illegal new license no = " + newLicense);
     }
 
+    if (driver.Status != Driver.Statuses.Active)
+    {
+      throw new InvalidOperationException("Driver is not active, cannot change license");
+    }
+
     driver.DriverLicense = newLicense;
 
 
