@@ -18,7 +18,7 @@ public class DriverService : IDriverService
   }
 
   public async Task<Driver> CreateDriver(string license, string lastName, string firstName, Driver.Types type,
-    Driver.Statuses status)
+    Driver.Statuses status, string photo)
   {
     var driver = new Driver();
     if (status == Driver.Statuses.Active)
@@ -34,6 +34,18 @@ public class DriverService : IDriverService
     driver.FirstName = firstName;
     driver.Status = status;
     driver.Type = type;
+    if (photo != null && photo.Any())
+    {
+      if (photo.IsBase64())
+      {
+        driver.Photo = photo;
+      }
+      else
+      {
+        throw new ArgumentException("Illegal photo in base64");
+      }
+    }
+
     return await _driverRepository.Save(driver);
   }
 
@@ -80,6 +92,29 @@ public class DriverService : IDriverService
 
 
     driver.Status = status;
+  }
+
+  public async Task ChangePhoto(long driverId, string photo)
+  {
+    var driver = await _driverRepository.Find(driverId);
+    if (driver == null)
+    {
+      throw new ArgumentException("Driver does not exists, id = " + driverId);
+    }
+
+    if (photo != null && photo.Any())
+    {
+      if (photo.IsBase64())
+      {
+        driver.Photo = photo;
+      }
+      else
+      {
+        throw new ArgumentException("Illegal photo in base64");
+      }
+    }
+
+    await _driverRepository.Save(driver);
   }
 
   public async Task<DriverDto> LoadDriver(long? driverId)

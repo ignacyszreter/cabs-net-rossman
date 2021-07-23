@@ -21,9 +21,9 @@ public class DriverController {
   }
 
   [HttpPost("/drivers")]
-  public async Task<DriverDto> CreateDriver([FromQuery] string license, [FromQuery] string firstName, [FromQuery] string lastName) 
+  public async Task<DriverDto> CreateDriver([FromQuery] string license, [FromQuery] string firstName, [FromQuery] string lastName, [FromQuery] string photo) 
   {
-    var driver = await _driverService.CreateDriver(license, lastName, firstName, Driver.Types.Candidate, Driver.Statuses.Inactive);
+    var driver = await _driverService.CreateDriver(license, lastName, firstName, Driver.Types.Candidate, Driver.Statuses.Inactive, photo);
 
     return await _driverService.LoadDriver(driver.Id);
   }
