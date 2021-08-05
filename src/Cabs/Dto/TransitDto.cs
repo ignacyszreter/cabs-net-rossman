@@ -31,6 +31,11 @@ public class TransitDto
     From = new AddressDto(transit.From);
     CarClass = transit.CarType;
     ClientDto = new ClientDto(transit.Client);
+    if (transit.EstimatedPrice != null)
+    {
+      EstimatedPrice = new decimal(transit.EstimatedPrice.Value);
+    }
+
     DateTime = transit.DateTime;
     Published = transit.Published;
     AcceptedAt = transit.AcceptedAt;
@@ -52,4 +57,5 @@ public class TransitDto
   public Instant? AcceptedAt { get; set; }
   public Instant? Started { get; set; }
   public Instant? CompleteAt { get; set; }
+  public decimal EstimatedPrice { get; set; }
 }

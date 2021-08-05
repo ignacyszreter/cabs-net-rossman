@@ -23,6 +23,7 @@ public class Transit : BaseEntity
   }
 
   public Instant? Date { get; private set; }
+  private float _km;
   public const int BaseFee = 9;
 
   public CarType.CarClasses? CarType { get; set; }
@@ -38,6 +39,15 @@ public class Transit : BaseEntity
   public Statuses? Status { get; set; }
 
   public Instant? CompleteAt { get; private set; }
+
+  public int EstimateCost()
+  {
+    var estimated = CalculateCost();
+
+    EstimatedPrice = estimated;
+
+    return estimated;
+  }
 
   public virtual Client Client { get; set; }
 
@@ -58,7 +68,7 @@ public class Transit : BaseEntity
     var baseFee = BaseFee;
     float kmRate = 1.0f;
 
-    var finalPrice = (int) Math.Round(Km * kmRate + baseFee);
+    var finalPrice = (int) Math.Round(_km * kmRate + baseFee);
     Price = finalPrice;
     return finalPrice;
   }
@@ -67,7 +77,15 @@ public class Transit : BaseEntity
 
   public Instant? Published { get; set; }
 
-  public float Km { get; set; }
+  public float Km 
+  {
+    get => _km;
+    set
+    {
+      _km = value;
+      EstimateCost();
+    }
+  }
 
   public int AwaitingDriversResponses { get; set; } = 0;
   public virtual ISet<Driver> DriversRejections { get; set; } = new HashSet<Driver>();
@@ -100,4 +118,5 @@ public class Transit : BaseEntity
     CompleteAt = when;
   }
 
+  public int? EstimatedPrice { get; set; }
 }
