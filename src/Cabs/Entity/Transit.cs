@@ -42,6 +42,11 @@ public class Transit : BaseEntity
 
   public int EstimateCost()
   {
+    if (Status == Statuses.Completed)
+    {
+      throw new InvalidOperationException("Estimating cost for completed transit is forbidden, id = " + Id);
+    }
+
     var estimated = CalculateCost();
 
     EstimatedPrice = estimated;
