@@ -22,6 +22,7 @@ builder.Services.AddTransient<IDriverNotificationService, DriverNotificationServ
 builder.Services.AddTransient<ICarTypeService, CarTypeService>();
 builder.Services.AddTransient<IClientService, ClientService>();
 builder.Services.AddTransient<IDriverService, DriverService>();
+builder.Services.AddTransient<IDriverFeeService, DriverFeeService>();
 builder.Services.AddTransient<IDriverTrackingService, DriverTrackingService>();
 builder.Services.AddTransient<IDriverSessionService, DriverSessionService>();
 builder.Services.AddTransient<IGeocodingService, GeocodingService>();
