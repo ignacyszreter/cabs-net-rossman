@@ -7,7 +7,8 @@ public class DriverFee : BaseEntity
 
   public enum FeeTypes
   {
-    Flat
+    Flat,
+    Percentage
   }
 
   public DriverFee()

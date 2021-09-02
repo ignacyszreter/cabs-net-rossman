@@ -31,7 +31,16 @@ public class DriverFeeService : IDriverFeeService
                                          transit.Driver.Id);
     }
 
-    var finalFee = transitPrice - driverFee.Amount;
+    int finalFee;
+    if (driverFee.FeeType == DriverFee.FeeTypes.Flat)
+    {
+      finalFee = transitPrice - driverFee.Amount;
+    }
+    else
+    {
+      finalFee = transitPrice * driverFee.Amount / 100;
+
+    }
 
     return finalFee;
   }
