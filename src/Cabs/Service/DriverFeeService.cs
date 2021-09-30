@@ -42,6 +42,6 @@ public class DriverFeeService : IDriverFeeService
 
     }
 
-    return finalFee;
+    return Math.Max(finalFee, driverFee.Min == null ? 0 : driverFee.Min.Value);
   }
 }

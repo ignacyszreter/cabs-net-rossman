@@ -16,16 +16,18 @@ public class DriverFee : BaseEntity
 
   }
 
-  public DriverFee(FeeTypes feeType, Driver driver, int amount)
+  public DriverFee(FeeTypes feeType, Driver driver, int amount, int min)
   {
     FeeType = feeType;
     Driver = driver;
     Amount = amount;
+    Min = min;
   }
 
   public FeeTypes FeeType { get; set; }
   public virtual Driver Driver { get; set; }
   public int Amount { get; set; }
+  public int? Min { get; set; }
 
   public override bool Equals(object obj)
   {
