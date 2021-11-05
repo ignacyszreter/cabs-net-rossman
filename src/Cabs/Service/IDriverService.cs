@@ -12,5 +12,6 @@ public interface IDriverService
   Task ChangeLicenseNumber(string newLicense, long? driverId);
   Task ChangeDriverStatus(long? driverId, Driver.Statuses status);
   Task ChangePhoto(long driverId, string photo);
+  Task<int> CalculateDriverMonthlyPayment(long? driverId, int year, int month);
   Task<DriverDto> LoadDriver(long? driverId);
 }

@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using LegacyFighter.Cabs.Dto;
 using LegacyFighter.Cabs.Entity;
 using LegacyFighter.Cabs.Repository;
+using NodaTime;
 
 namespace LegacyFighter.Cabs.Service;
 
@@ -11,10 +12,17 @@ public class DriverService : IDriverService
   public const string DriverLicenseRegex = "^[A-Z9]{5}\\d{6}[A-Z9]{2}\\d[A-Z]{2}$";
 
   private readonly IDriverRepository _driverRepository;
+  private readonly ITransitRepository _transitRepository;
+  private readonly IDriverFeeService _driverFeeService;
 
-  public DriverService(IDriverRepository driverRepository)
+  public DriverService(
+    IDriverRepository driverRepository,
+    ITransitRepository transitRepository,
+    IDriverFeeService driverFeeService)
   {
     _driverRepository = driverRepository;
+    _transitRepository = transitRepository;
+    _driverFeeService = driverFeeService;
   }
 
   public async Task<Driver> CreateDriver(string license, string lastName, string firstName, Driver.Types type,
@@ -115,6 +123,31 @@ public class DriverService : IDriverService
     }
 
     await _driverRepository.Save(driver);
+  }
+
+  public async Task<int> CalculateDriverMonthlyPayment(long? driverId, int year, int month) 
+  {
+    var driver = await _driverRepository.Find(driverId);
+    if (driver == null)
+      throw new ArgumentException("Driver does not exists, id = " + driverId);
+
+    var yearMonth = new YearMonth(year, month);
+    var from = yearMonth
+      .OnDayOfMonth(1).AtStartOfDayInZone(DateTimeZoneProviders.Bcl.GetSystemDefault())
+      
+      .ToInstant();
+    var to = yearMonth
+
+      .AtEndOfMonth().PlusDays(1).AtStartOfDayInZone(DateTimeZoneProviders.Bcl.GetSystemDefault()).ToInstant();
+
+    var transitsList = await _transitRepository.FindAllByDriverAndDateTimeBetween(driver, @from, to);
+
+    var sum = await transitsList
+      .Select(t => _driverFeeService.CalculateDriverFee(t.Id)).Aggregate(
+        Task.FromResult(0), 
+        async (sumSoFar, next) => await  sumSoFar + await next);
+
+    return sum;
   }
 
   public async Task<DriverDto> LoadDriver(long? driverId)
