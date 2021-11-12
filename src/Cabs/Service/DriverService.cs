@@ -150,6 +150,16 @@ public class DriverService : IDriverService
     return sum;
   }
 
+  public async Task<Dictionary<Month, int>> CalculateDriverYearlyPayment(long? driverId, int year)
+  {
+    var payments = new Dictionary<Month, int>();
+    foreach (var m in Month.Values()) 
+    {
+      payments[m] = await CalculateDriverMonthlyPayment(driverId, year, m.Value);
+    }
+    return payments;
+  }
+
   public async Task<DriverDto> LoadDriver(long? driverId)
   {
     var driver = await _driverRepository.Find(driverId);
