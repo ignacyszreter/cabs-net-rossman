@@ -28,6 +28,7 @@ public class Driver : BaseEntity
     return null;
   }
 
+  public virtual ISet<DriverAttribute> Attributes { get; set; } = new HashSet<DriverAttribute>();
   public Types? Type { get; set; }
   public Statuses Status { get; set; }
   public string FirstName { get; set; }

@@ -17,6 +17,7 @@ public class SqLiteDbContext : DbContext
   public DbSet<CarType> CarTypes { get; set; }
   public DbSet<Client> Clients { get; set; }
   public DbSet<Driver> Drivers { get; set; }
+  public DbSet<DriverAttribute> DriverAttributes { get; set; }
   public DbSet<DriverFee> DriverFees { get; set; }
   public DbSet<DriverPosition> DriverPositions { get; set; }
   public DbSet<DriverSession> DriverSessions { get; set; }
@@ -73,8 +74,16 @@ public class SqLiteDbContext : DbContext
       e.Property(d => d.Status).HasConversion<string>().IsRequired();
       e.Property(d => d.Type).HasConversion<string>();
       e.Property(d => d.DriverLicense).IsRequired();
+      e.HasMany(d => d.Attributes).WithOne(d => d.Driver);
       e.HasMany(d => d.Transits).WithOne(t => t.Driver);
       e.HasOne(d => d.Fee).WithOne(f => f.Driver).HasForeignKey<DriverFee>(x => x.Id);
+    });
+    modelBuilder.Entity<DriverAttribute>(builder =>
+    {
+      builder.HasKey(x => x.Id);
+      builder.Property(a => a.Name).HasConversion<string>().IsRequired();
+      builder.Property(a => a.Value).IsRequired();
+      builder.HasOne(a => a.Driver).WithMany(d => d.Attributes);
     });
     modelBuilder.Entity<DriverFee>(builder =>
     {

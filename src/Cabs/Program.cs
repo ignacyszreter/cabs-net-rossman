@@ -12,6 +12,7 @@ builder.Services.AddDbContext<SqLiteDbContext>();
 builder.Services.AddTransient<IAddressRepositoryInterface, EfCoreAddressRepository>();
 builder.Services.AddTransient<IDriverRepository, EfCoreDriverRepository>();
 builder.Services.AddTransient<IDriverFeeRepository, EfCoreDriverFeeRepository>();
+builder.Services.AddTransient<IDriverAttributeRepository, EfCoreDriverAttributeRepository>();
 builder.Services.AddTransient<IDriverSessionRepository, EfCoreDriverSessionRepository>();
 builder.Services.AddTransient<IDriverPositionRepository, EfCoreDriverPositionRepository>();
 builder.Services.AddTransient<IClientRepository, EfCoreClientRepository>();
