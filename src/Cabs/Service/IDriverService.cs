@@ -15,4 +15,5 @@ public interface IDriverService
   Task<int> CalculateDriverMonthlyPayment(long? driverId, int year, int month);
   Task<Dictionary<Month, int>> CalculateDriverYearlyPayment(long? driverId, int year);
   Task<DriverDto> LoadDriver(long? driverId);
+  Task AddAttribute(long driverId, DriverAttribute.DriverAttributeNames attr, string value);
 }

@@ -12,15 +12,18 @@ public class DriverService : IDriverService
   public const string DriverLicenseRegex = "^[A-Z9]{5}\\d{6}[A-Z9]{2}\\d[A-Z]{2}$";
 
   private readonly IDriverRepository _driverRepository;
+  private readonly IDriverAttributeRepository _driverAttributeRepository;
   private readonly ITransitRepository _transitRepository;
   private readonly IDriverFeeService _driverFeeService;
 
   public DriverService(
     IDriverRepository driverRepository,
+    IDriverAttributeRepository driverAttributeRepository,
     ITransitRepository transitRepository,
     IDriverFeeService driverFeeService)
   {
     _driverRepository = driverRepository;
+    _driverAttributeRepository = driverAttributeRepository;
     _transitRepository = transitRepository;
     _driverFeeService = driverFeeService;
   }
@@ -169,5 +172,17 @@ public class DriverService : IDriverService
     }
 
     return new DriverDto(driver);
+  }
+
+  public async Task AddAttribute(long driverId, DriverAttribute.DriverAttributeNames attr, string value)
+  {
+    var driver = await _driverRepository.Find(driverId);
+    if (driver == null)
+    {
+      throw new ArgumentException("Driver does not exists, id = " + driverId);
+    }
+
+    await _driverAttributeRepository.Save(new DriverAttribute(driver, attr, value));
+
   }
 }
