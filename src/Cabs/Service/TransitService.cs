@@ -20,6 +20,7 @@ public class TransitService : ITransitService
   private readonly IGeocodingService _geocodingService;
   private readonly AddressRepository _addressRepository;
   private readonly IClock _clock;
+  private readonly IAwardsService _awardsService;
 
   public TransitService(
     IDriverRepository driverRepository,
@@ -33,7 +34,8 @@ public class TransitService : ITransitService
     ICarTypeService carTypeService,
     IGeocodingService geocodingService,
     AddressRepository addressRepository,
-    IClock clock)
+    IClock clock,
+    IAwardsService awardsService)
   {
     _driverRepository = driverRepository;
     _transitRepository = transitRepository;
@@ -47,6 +49,7 @@ public class TransitService : ITransitService
     _geocodingService = geocodingService;
     _addressRepository = addressRepository;
     _clock = clock;
+    _awardsService = awardsService;
   }
 
   public async Task<Transit> CreateTransit(TransitDto transitDto)
@@ -491,6 +494,7 @@ public class TransitService : ITransitService
       transit.Status = Transit.Statuses.Completed;
       transit.CalculateFinalCosts();
       transit.CompleteTransitAt(_clock.GetCurrentInstant());
+      await _awardsService.RegisterMiles(transit.Client.Id, transitId);
       await _transitRepository.Save(transit);
       await _invoiceGenerator.Generate(transit.Price,
         transit.Client.Name + " " + transit.Client.LastName);

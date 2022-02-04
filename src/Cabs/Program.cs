@@ -21,6 +21,7 @@ builder.Services.AddTransient<IAwardsAccountRepository, EfCoreAwardsAccountRepos
 builder.Services.AddTransient<IAwardedMilesRepository, EfCoreAwardedMilesRepository>();
 builder.Services.AddTransient<IInvoiceRepository, EfCoreInvoiceRepository>();
 builder.Services.AddTransient<ICarTypeRepository, EfCoreCarTypeRepository>();
+builder.Services.AddTransient<IAwardsService, AwardsServiceImpl>();
 builder.Services.AddTransient<IDriverNotificationService, DriverNotificationService>();
 builder.Services.AddTransient<ICarTypeService, CarTypeService>();
 builder.Services.AddTransient<IClientService, ClientService>();
