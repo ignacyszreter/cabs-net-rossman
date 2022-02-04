@@ -14,6 +14,8 @@ public class SqLiteDbContext : DbContext
 {
   private readonly DbConnection _connection;
   public DbSet<Address> Addresses { get; set; }
+  public DbSet<AwardedMiles> AwardedMiles { get; set; }
+  public DbSet<AwardsAccount> AwardsAccounts { get; set; }
   public DbSet<CarType> CarTypes { get; set; }
   public DbSet<Client> Clients { get; set; }
   public DbSet<Driver> Drivers { get; set; }
@@ -54,6 +56,23 @@ public class SqLiteDbContext : DbContext
     {
       builder.MapBaseEntityProperties();
       builder.HasIndex(u => u.Hash).IsUnique();
+    });
+    modelBuilder.Entity<AwardedMiles>(builder =>
+    {
+      builder.MapBaseEntityProperties();
+      builder.HasOne(m => m.Client);
+      builder.Property(m => m.Miles).IsRequired();
+      builder.HasOne(m => m.Transit);
+      builder.Property(x => x.Date).HasConversion(instantConverter).IsRequired();
+      builder.Property(x => x.ExpirationDate).HasConversion(instantConverter);
+    });
+    modelBuilder.Entity<AwardsAccount>(builder =>
+    {
+      builder.MapBaseEntityProperties();
+      builder.HasOne(a => a.Client);
+      builder.Property(x => x.Date).HasConversion(instantConverter).IsRequired();
+      builder.Property(x => x.Transactions).IsRequired();
+      builder.Property(x => x.Active).IsRequired();
     });
     modelBuilder.Entity<CarType>(builder =>
     {
