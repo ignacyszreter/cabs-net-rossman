@@ -56,6 +56,34 @@ public class AwardsServiceImpl : IAwardsService
     await _accountRepository.Save(account);
   }
 
+  public async Task ActivateAccount(long? clientId)
+  {
+    var account = await _accountRepository.FindByClient(await _clientRepository.Find(clientId));
+
+    if (account == null)
+    {
+      throw new ArgumentException("Account does not exists, id = " + clientId);
+    }
+
+    account.Active = true;
+
+    await _accountRepository.Save(account);
+  }
+
+  public async Task DeactivateAccount(long? clientId)
+  {
+    var account = await _accountRepository.FindByClient(await _clientRepository.Find(clientId));
+
+    if (account == null)
+    {
+      throw new ArgumentException("Account does not exists, id = " + clientId);
+    }
+
+    account.Active = false;
+
+    await _accountRepository.Save(account);
+  }
+
   public async Task<AwardedMiles> RegisterMiles(long? clientId, long? transitId)
   {
     var account = await _accountRepository.FindByClient(await _clientRepository.Find(clientId));
@@ -66,7 +94,7 @@ public class AwardsServiceImpl : IAwardsService
     }
 
     var now = _clock.GetCurrentInstant();
-    if (account == null)
+    if (account == null || !account.Active)
     {
       return null;
     }
