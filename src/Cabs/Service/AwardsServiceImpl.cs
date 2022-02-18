@@ -106,7 +106,8 @@ public class AwardsServiceImpl : IAwardsService
         Date = _clock.GetCurrentInstant(),
         Client = account.Client,
         Miles = _appProperties.DefaultMilesBonus,
-        ExpirationDate = now.Plus(Duration.FromDays(_appProperties.MilesExpirationInDays))
+        ExpirationDate = now.Plus(Duration.FromDays(_appProperties.MilesExpirationInDays)),
+        IsSpecial = false
       };
       account.IncreaseTransactions();
 
@@ -116,12 +117,87 @@ public class AwardsServiceImpl : IAwardsService
     }
   }
 
+  public async Task<AwardedMiles> RegisterSpecialMiles(long? clientId, int miles)
+  {
+    var account = await _accountRepository.FindByClient(await _clientRepository.Find(clientId));
+
+    if (account == null)
+    {
+      throw new ArgumentException("Account does not exists, id = " + clientId);
+    }
+    else
+    {
+      var specialMiles = new AwardedMiles
+      {
+        Transit = null,
+        Client = account.Client,
+        Miles = miles,
+        Date = _clock.GetCurrentInstant(),
+        IsSpecial = true
+      };
+      account.IncreaseTransactions();
+      await _milesRepository.Save(specialMiles);
+      await _accountRepository.Save(account);
+      return specialMiles;
+    }
+  }
+
+  public async Task RemoveMiles(long? clientId, int miles)
+  {
+    var client = await _clientRepository.Find(clientId);
+    var account = await _accountRepository.FindByClient(client);
+
+    if (account == null)
+    {
+      throw new ArgumentException("Account does not exists, id = " + clientId);
+    }
+    else
+    {
+      if (await CalculateBalance(clientId) >= miles && account.Active)
+      {
+        var milesList = (await _milesRepository.FindAllByClient(client)).OrderBy(m => m.Date).ToList();
+
+        foreach (var iter in milesList) 
+        {
+          if (miles <= 0)
+          {
+            break;
+          }
+
+          if (iter.IsSpecial || iter.ExpirationDate > _clock.GetCurrentInstant())
+          {
+            if (iter.Miles <= miles)
+            {
+              miles -= iter.Miles;
+              iter.Miles = 0;
+            }
+            else
+            {
+              iter.Miles = iter.Miles - miles;
+              miles = 0;
+            }
+
+            await _milesRepository.Save(iter);
+          }
+        }
+      }
+      else
+      {
+        throw new ArgumentException("Insufficient miles, id = " + clientId + ", miles requested = " + miles);
+      }
+    }
+
+  }
+
   public async Task<int> CalculateBalance(long? clientId)
   {
     var client = await _clientRepository.Find(clientId);
     var milesList = await _milesRepository.FindAllByClient(client);
 
-    var sum = milesList.Where(t => t.ExpirationDate != null && t.ExpirationDate > _clock.GetCurrentInstant())
+    var sum = milesList.Where(t => 
+        t.ExpirationDate != null && 
+        t.ExpirationDate > _clock.GetCurrentInstant() || 
+        t.IsSpecial)
       .Select(t => t.Miles).Sum();
 
     return sum;
