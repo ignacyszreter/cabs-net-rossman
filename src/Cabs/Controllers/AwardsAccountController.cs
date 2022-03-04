@@ -43,6 +43,13 @@ public class AwardsAccountController
     return await _awardsService.CalculateBalance(clientId);
   }
 
+  [HttpPost("/clients/{clientId}/awards/transfer/{toClientId}/{howMuch}")]
+  public async Task<AwardsAccountDto> TransferMiles(long? clientId, long? toClientId, int howMuch)
+  {
+    await _awardsService.TransferMiles(clientId, toClientId, howMuch);
+    return await _awardsService.FindBy(clientId);
+  }
+
   [HttpGet("/clients/{clientId}/awards/")]
   public async Task<AwardsAccountDto> FindBy(long? clientId)
   {

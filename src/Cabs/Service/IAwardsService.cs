@@ -14,4 +14,5 @@ public interface IAwardsService
   Task<AwardedMiles> RegisterSpecialMiles(long? clientId, int miles);
   Task RemoveMiles(long? clientId, int miles);
   Task<int> CalculateBalance(long? clientId);
+  Task TransferMiles(long? fromClientId, long? toClientId, int miles);
 }

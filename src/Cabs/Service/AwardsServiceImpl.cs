@@ -202,4 +202,61 @@ public class AwardsServiceImpl : IAwardsService
 
     return sum;
   }
+
+  public async Task TransferMiles(long? fromClientId, long? toClientId, int miles)
+  {
+    var fromClient = await _clientRepository.Find(fromClientId);
+    var accountFrom = await _accountRepository.FindByClient(fromClient);
+    var accountTo = await _accountRepository.FindByClient(await _clientRepository.Find(toClientId));
+    if (accountFrom == null)
+    {
+      throw new ArgumentException("Account does not exists, id = " + fromClientId);
+    }
+
+    if (accountTo == null)
+    {
+      throw new ArgumentException("Account does not exists, id = " + toClientId);
+    }
+
+    if (await CalculateBalance(fromClientId) >= miles && accountFrom.Active)
+    {
+      var milesList = await _milesRepository.FindAllByClient(fromClient);
+
+      foreach(var iter in milesList) 
+      {
+        if (iter.IsSpecial || iter.ExpirationDate > _clock.GetCurrentInstant())
+        {
+          if (iter.Miles <= miles)
+          {
+            iter.Client = accountTo.Client;
+            miles -= iter.Miles;
+          }
+          else
+          {
+            iter.Miles = iter.Miles - miles;
+            var awardedMiles = new AwardedMiles
+            {
+              Client = accountTo.Client,
+              IsSpecial = iter.IsSpecial,
+              ExpirationDate = iter.ExpirationDate,
+              Miles = miles
+            };
+
+            miles -= iter.Miles;
+
+            await _milesRepository.Save(awardedMiles);
+
+          }
+
+          await _milesRepository.Save(iter);
+        }
+      }
+
+      accountFrom.IncreaseTransactions();
+      accountTo.IncreaseTransactions();
+
+      await _accountRepository.Save(accountFrom);
+      await _accountRepository.Save(accountTo);
+    }
+  }
 }
