@@ -1,0 +1,34 @@
+using System.Linq;
+using LegacyFighter.Cabs.Common;
+using LegacyFighter.Cabs.Entity;
+
+namespace LegacyFighter.Cabs.Service;
+
+public class TransactionalDriverSessionService : IDriverSessionService
+{
+  private readonly IDriverSessionService _inner;
+  private readonly ITransactions _transactions;
+
+  public TransactionalDriverSessionService(IDriverSessionService inner, ITransactions transactions)
+  {
+    _inner = inner;
+    _transactions = transactions;
+  }
+
+  public Task<DriverSession> LogIn(long? driverId, string plateNumber, CarType.CarClasses? carClass)
+  {
+    return _inner.LogIn(driverId, plateNumber, carClass);
+  }
+
+  public async Task LogOut(long sessionId)
+  {
+    await using var tx = await _transactions.BeginTransaction();
+    await _inner.LogOut(sessionId);
+    await tx.Commit();
+  }
+
+  public Task<List<DriverSession>> FindByDriver(long? driverId)
+  {
+    return _inner.FindByDriver(driverId);
+  }
+}

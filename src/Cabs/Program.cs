@@ -1,3 +1,4 @@
+using LegacyFighter.Cabs.Common;
 using LegacyFighter.Cabs.Config;
 using LegacyFighter.Cabs.Repository;
 using LegacyFighter.Cabs.Service;
@@ -9,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton(_ => SqLiteDbContext.CreateInMemoryDatabase());
 builder.Services.AddDbContext<SqLiteDbContext>();
+builder.Services.AddTransient<ITransactions, Transactions>();
 builder.Services.AddTransient<IAddressRepositoryInterface, EfCoreAddressRepository>();
 builder.Services.AddTransient<IDriverRepository, EfCoreDriverRepository>();
 builder.Services.AddTransient<IDriverFeeRepository, EfCoreDriverFeeRepository>();
@@ -21,16 +23,48 @@ builder.Services.AddTransient<IAwardsAccountRepository, EfCoreAwardsAccountRepos
 builder.Services.AddTransient<IAwardedMilesRepository, EfCoreAwardedMilesRepository>();
 builder.Services.AddTransient<IInvoiceRepository, EfCoreInvoiceRepository>();
 builder.Services.AddTransient<ICarTypeRepository, EfCoreCarTypeRepository>();
-builder.Services.AddTransient<IAwardsService, AwardsServiceImpl>();
+builder.Services.AddTransient<AwardsServiceImpl>();
+builder.Services.AddTransient<IAwardsService>(ctx =>
+  new TransactionalAwardsService(
+    ctx.GetRequiredService<AwardsServiceImpl>(),
+    ctx.GetRequiredService<ITransactions>()));
 builder.Services.AddTransient<IDriverNotificationService, DriverNotificationService>();
-builder.Services.AddTransient<ICarTypeService, CarTypeService>();
-builder.Services.AddTransient<IClientService, ClientService>();
-builder.Services.AddTransient<IDriverService, DriverService>();
-builder.Services.AddTransient<IDriverFeeService, DriverFeeService>();
-builder.Services.AddTransient<IDriverTrackingService, DriverTrackingService>();
-builder.Services.AddTransient<IDriverSessionService, DriverSessionService>();
+builder.Services.AddTransient<CarTypeService>();
+builder.Services.AddTransient<ICarTypeService>(
+  ctx => new TransactionalCarTypeService(
+    ctx.GetRequiredService<CarTypeService>(), 
+    ctx.GetRequiredService<ITransactions>()));
+builder.Services.AddTransient<ClientService>();
+builder.Services.AddTransient<IClientService>(
+  ctx => new TransactionalClientService(
+    ctx.GetRequiredService<ClientService>(), 
+    ctx.GetRequiredService<ITransactions>()));
+builder.Services.AddTransient<DriverService>();
+builder.Services.AddTransient<IDriverService>(ctx =>
+  new TransactionalDriverService(
+    ctx.GetRequiredService<DriverService>(), 
+    ctx.GetRequiredService<ITransactions>()));
+builder.Services.AddTransient<DriverFeeService>();
+builder.Services.AddTransient<IDriverFeeService>(ctx =>
+  new TransactionalDriverFeeService(
+    ctx.GetRequiredService<DriverFeeService>(),
+    ctx.GetRequiredService<ITransactions>()));
+builder.Services.AddTransient<DriverTrackingService>();
+builder.Services.AddTransient<IDriverTrackingService>(ctx =>
+  new TransactionalDriverTrackingService(
+    ctx.GetRequiredService<DriverTrackingService>(),
+    ctx.GetRequiredService<ITransactions>()));
+builder.Services.AddTransient<DriverSessionService>();
+builder.Services.AddTransient<IDriverSessionService>(ctx =>
+  new TransactionalDriverSessionService(
+    ctx.GetRequiredService<DriverSessionService>(),
+    ctx.GetRequiredService<ITransactions>()));
 builder.Services.AddTransient<IGeocodingService, GeocodingService>();
-builder.Services.AddTransient<ITransitService, TransitService>();
+builder.Services.AddTransient<TransitService>();
+builder.Services.AddTransient<ITransitService>(ctx =>
+  new TransactionalTransitService(
+    ctx.GetRequiredService<TransitService>(),
+    ctx.GetRequiredService<ITransactions>()));
 builder.Services.AddTransient<InvoiceGenerator>();
 builder.Services.AddTransient<DistanceCalculator>();
 builder.Services.AddSingleton<IAppProperties, AppProperties>();
