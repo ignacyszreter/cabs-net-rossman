@@ -5,6 +5,25 @@ namespace LegacyFighter.Cabs.Entity;
 public class Client : BaseEntity
 {
 
+  public enum Types
+  {
+    Normal,
+    Vip
+  }
+
+  public enum ClientTypes
+  {
+    Individual,
+    Company
+  }
+
+  public enum PaymentTypes
+  {
+    PrePaid,
+    PostPaid,
+    MonthlyInvoice
+  }
+
   public Client()
   {
 
@@ -12,6 +31,9 @@ public class Client : BaseEntity
 
   public string Name { get; set; }
   public string LastName { get; set; }
+  public ClientTypes? ClientType { get; set; }
+  public Types? Type { get; set; }
+  public PaymentTypes? DefaultPaymentType { get; set; }
 
   public override bool Equals(object obj)
   {

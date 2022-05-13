@@ -16,12 +16,33 @@ public class TransactionalClientService : IClientService
     _transactions = transactions;
   }
 
-  public async Task<Client> RegisterClient(string name, string lastName)
+  public async Task<Client> RegisterClient(string name, string lastName, Client.Types? type, Client.PaymentTypes? paymentType)
   {
     await using var tx = await _transactions.BeginTransaction();
-    var client = await _inner.RegisterClient(name, lastName);
+    var client = await _inner.RegisterClient(name, lastName, type, paymentType);
     await tx.Commit();
     return client;
+  }
+
+  public async Task ChangeDefaultPaymentType(long? clientId, Client.PaymentTypes? paymentType)
+  {
+    await using var tx = await _transactions.BeginTransaction();
+    await _inner.ChangeDefaultPaymentType(clientId, paymentType);
+    await tx.Commit();
+  }
+
+  public async Task UpgradeToVip(long? clientId)
+  {
+    await using var tx = await _transactions.BeginTransaction();
+    await _inner.UpgradeToVip(clientId);
+    await tx.Commit();
+  }
+
+  public async Task DowngradeToRegular(long? clientId)
+  {
+    await using var tx = await _transactions.BeginTransaction();
+    await _inner.DowngradeToRegular(clientId);
+    await tx.Commit();
   }
 
   public async Task<ClientDto> Load(long? id)

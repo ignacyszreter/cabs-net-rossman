@@ -86,6 +86,8 @@ public class SqLiteDbContext : DbContext
     modelBuilder.Entity<Client>(builder =>
     {
       builder.MapBaseEntityProperties();
+      builder.Property(c => c.ClientType).HasConversion<string>();
+      builder.Property(c => c.DefaultPaymentType).HasConversion<string>();
     });
     modelBuilder.Entity<Driver>(e =>
     {

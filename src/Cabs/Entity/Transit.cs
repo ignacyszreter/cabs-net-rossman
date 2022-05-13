@@ -22,6 +22,7 @@ public class Transit : BaseEntity
     Completed
   }
 
+  private Client.PaymentTypes? PaymentType { get; set; }
   public Instant? Date { get; private set; }
   private float _km;
   public const int BaseFee = 9;
