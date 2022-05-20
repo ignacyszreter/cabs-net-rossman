@@ -22,6 +22,23 @@ public class Transit : BaseEntity
     Completed
   }
 
+  public enum DriverPaymentStatuses
+  {
+    NotPaid,
+    Paid,
+    Claimed,
+    Returned
+  }
+
+  public enum ClientPaymentStatuses
+  {
+    NotPaid,
+    Paid,
+    Returned
+  }
+
+  private DriverPaymentStatuses? DriverPaymentStatus { get; set; }
+  private ClientPaymentStatuses? ClientPaymentStatus { get; set; }
   private Client.PaymentTypes? PaymentType { get; set; }
   public Instant? Date { get; private set; }
   private float _km;
