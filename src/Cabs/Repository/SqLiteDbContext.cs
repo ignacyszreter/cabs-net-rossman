@@ -17,6 +17,7 @@ public class SqLiteDbContext : DbContext
   public DbSet<AwardedMiles> AwardedMiles { get; set; }
   public DbSet<AwardsAccount> AwardsAccounts { get; set; }
   public DbSet<CarType> CarTypes { get; set; }
+  public DbSet<Claim> Claims { get; set; }
   public DbSet<Client> Clients { get; set; }
   public DbSet<Driver> Drivers { get; set; }
   public DbSet<DriverAttribute> DriverAttributes { get; set; }
@@ -83,11 +84,25 @@ public class SqLiteDbContext : DbContext
       builder.Property(t => t.MinNoOfCarsToActivateClass).IsRequired();
       builder.Property(t => t.ActiveCarsCounter).IsRequired();
     });
+    modelBuilder.Entity<Claim>(builder =>
+    {
+      builder.MapBaseEntityProperties();
+      builder.HasOne(c => c.Owner).WithMany(c => c.Claims);
+      builder.HasOne(c => c.Transit);
+      builder.Property(x => x.ChangeDate).HasConversion(instantConverter);
+      builder.Property(x => x.CompletionDate).HasConversion(instantConverter);
+      builder.Property(x => x.CreationDate).HasConversion(instantConverter).IsRequired();
+      builder.Property(x => x.Reason).IsRequired();
+      builder.Property(x => x.CompletionMode).HasConversion<string>();
+      builder.Property(x => x.Status).HasConversion<string>().IsRequired();
+      builder.Property(x => x.ClaimNo).IsRequired();
+    });
     modelBuilder.Entity<Client>(builder =>
     {
       builder.MapBaseEntityProperties();
       builder.Property(c => c.ClientType).HasConversion<string>();
       builder.Property(c => c.DefaultPaymentType).HasConversion<string>();
+      builder.HasMany(c => c.Claims).WithOne(c => c.Owner);
     });
     modelBuilder.Entity<Driver>(e =>
     {
