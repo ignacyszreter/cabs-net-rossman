@@ -18,6 +18,7 @@ public class SqLiteDbContext : DbContext
   public DbSet<AwardsAccount> AwardsAccounts { get; set; }
   public DbSet<CarType> CarTypes { get; set; }
   public DbSet<Claim> Claims { get; set; }
+  public DbSet<ClaimAttachment> ClaimAttachments { get; set; }
   public DbSet<Client> Clients { get; set; }
   public DbSet<Driver> Drivers { get; set; }
   public DbSet<DriverAttribute> DriverAttributes { get; set; }
@@ -96,6 +97,13 @@ public class SqLiteDbContext : DbContext
       builder.Property(x => x.CompletionMode).HasConversion<string>();
       builder.Property(x => x.Status).HasConversion<string>().IsRequired();
       builder.Property(x => x.ClaimNo).IsRequired();
+    });
+    modelBuilder.Entity<ClaimAttachment>(builder =>
+    {
+      builder.MapBaseEntityProperties();
+      builder.HasOne(a => a.Claim);
+      builder.Property(x => x.CreationDate).HasConversion(instantConverter).IsRequired();
+      builder.Property(x => x.Data).HasColumnType("BLOB");
     });
     modelBuilder.Entity<Client>(builder =>
     {
