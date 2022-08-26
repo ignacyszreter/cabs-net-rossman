@@ -13,14 +13,16 @@ public class ClaimService : IClaimService
   private readonly ITransitRepository _transitRepository;
   private readonly IClaimRepository _claimRepository;
   private readonly ClaimNumberGenerator _claimNumberGenerator;
+  private readonly IClientNotificationService _clientNotificationService;
 
-  public ClaimService(IClock clock, IClientRepository clientRepository, ITransitRepository transitRepository, IClaimRepository claimRepository, ClaimNumberGenerator claimNumberGenerator)
+  public ClaimService(IClock clock, IClientRepository clientRepository, ITransitRepository transitRepository, IClaimRepository claimRepository, ClaimNumberGenerator claimNumberGenerator, IClientNotificationService clientNotificationService)
   {
     _clock = clock;
     _clientRepository = clientRepository;
     _transitRepository = transitRepository;
     _claimRepository = claimRepository;
     _claimNumberGenerator = claimNumberGenerator;
+    _clientNotificationService = clientNotificationService;
   }
 
   public async Task<Claim> Create(ClaimDto claimDto)
@@ -80,6 +82,27 @@ public class ClaimService : IClaimService
   {
     var claim = await Find(id);
     claim.Status = newStatus;
+    return claim;
+  }
+
+  public async Task<Claim> TryToResolveAutomatically(long? id)
+  {
+    var claim = await Find(id);
+    if ((await _claimRepository.FindByOwner(claim.Owner)).Count <= 3)
+    {
+      claim.Status = Claim.Statuses.Refunded;
+      claim.CompletionDate = SystemClock.Instance.GetCurrentInstant();
+      claim.ChangeDate = SystemClock.Instance.GetCurrentInstant();
+      claim.CompletionMode = Claim.CompletionModes.Automatic;
+      _clientNotificationService.NotifyClientAboutRefund(claim.ClaimNo, claim.Owner.Id);
+      return claim;
+    }
+
+    claim.Status = Claim.Statuses.Escalated;
+    claim.CompletionDate = SystemClock.Instance.GetCurrentInstant();
+    claim.ChangeDate = SystemClock.Instance.GetCurrentInstant();
+    claim.CompletionMode = Claim.CompletionModes.Manual;
+
     return claim;
   }
 }

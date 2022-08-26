@@ -34,6 +34,7 @@ builder.Services.AddTransient<IAwardsService>(ctx =>
   new TransactionalAwardsService(
     ctx.GetRequiredService<AwardsServiceImpl>(),
     ctx.GetRequiredService<ITransactions>()));
+builder.Services.AddTransient<IClientNotificationService, ClientNotificationService>();
 builder.Services.AddTransient<IDriverNotificationService, DriverNotificationService>();
 builder.Services.AddTransient<CarTypeService>();
 builder.Services.AddTransient<ICarTypeService>(

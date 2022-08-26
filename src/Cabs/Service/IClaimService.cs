@@ -10,4 +10,5 @@ public interface IClaimService
   Task<Claim> Find(long? id);
   Task<Claim> Update(ClaimDto claimDto, Claim claim);
   Task<Claim> SetStatus(Claim.Statuses newStatus, long? id);
+  Task<Claim> TryToResolveAutomatically(long? id);
 }

@@ -52,6 +52,13 @@ public class ClaimController
     return dto;
   }
 
+  [HttpPost("/claims/{id}")]
+  public async Task<ClaimDto> TryToAutomaticallyResolve(long id)
+  {
+    var claim = await _claimService.TryToResolveAutomatically(id);
+    return ToDto(claim);
+  }
+
   private ClaimDto ToDto(Claim claim)
   {
     return new ClaimDto(claim);

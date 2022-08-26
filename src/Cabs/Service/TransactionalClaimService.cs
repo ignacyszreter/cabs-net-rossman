@@ -38,4 +38,12 @@ public class TransactionalClaimService : IClaimService
     await tx.Commit();
     return status;
   }
+
+  public async Task<Claim> TryToResolveAutomatically(long? id)
+  {
+    await using var tx = await _transactions.BeginTransaction();
+    var claim = await _inner.TryToResolveAutomatically(id);
+    await tx.Commit();
+    return claim;
+  }
 }
