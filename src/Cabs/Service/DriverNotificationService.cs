@@ -5,6 +5,7 @@ public interface IDriverNotificationService
   void NotifyAboutPossibleTransit(long? driverId, long? transitId);
   void NotifyAboutChangedTransitAddress(long? driverId, long? transitId);
   void NotifyAboutCancelledTransit(long? driverId, long? transitId);
+  void AskDriverForDetailsAboutClaim(string claimNo, long? driverId);
 }
 
 public class DriverNotificationService : IDriverNotificationService
@@ -20,6 +21,11 @@ public class DriverNotificationService : IDriverNotificationService
   }
 
   public void NotifyAboutCancelledTransit(long? driverId, long? transitId)
+  {
+    // ...
+  }
+
+  public void AskDriverForDetailsAboutClaim(string claimNo, long? driverId)
   {
     // ...
   }
