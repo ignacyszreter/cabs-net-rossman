@@ -9,6 +9,7 @@ public interface ITransitRepository
 {
   Task<List<Transit>> FindAllByDriverAndDateTimeBetween(Driver driver, Instant @from, Instant to);
 
+  Task<List<Transit>> FindByClient(Client client);
   Task<Transit> Find(long? transitId);
   Task<Transit> Save(Transit transit);
 }
@@ -29,6 +30,11 @@ internal class EfCoreTransitRepository : ITransitRepository
         t.DateTime >= from && 
         t.DateTime <= to)
       .ToListAsync();
+  }
+
+  public async Task<List<Transit>> FindByClient(Client client)
+  {
+    return await _context.Transits.Where(t => t.Client == client).ToListAsync();
   }
 
   public async Task<Transit> Find(long? transitId)

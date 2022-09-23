@@ -128,11 +128,34 @@ public class ClaimService : IClaimService
     }
     else
     {
-      claim.Status = Claim.Statuses.Escalated;
-      claim.CompletionDate = SystemClock.Instance.GetCurrentInstant();
-      claim.ChangeDate = SystemClock.Instance.GetCurrentInstant();
-      claim.CompletionMode = Claim.CompletionModes.Manual;
-      _driverNotificationService.AskDriverForDetailsAboutClaim(claim.ClaimNo, claim.Owner.Id);
+      if ((await _transitRepository.FindByClient(claim.Owner)).Count >=
+           _appProperties.NoOfTransitsForClaimAutomaticRefund)
+      {
+        if (claim.Transit.Price < _appProperties.AutomaticRefundForVipThreshold)
+        {
+          claim.Status = Claim.Statuses.Refunded;
+          claim.CompletionDate = SystemClock.Instance.GetCurrentInstant();
+          claim.ChangeDate = SystemClock.Instance.GetCurrentInstant();
+          claim.CompletionMode = Claim.CompletionModes.Automatic;
+          _clientNotificationService.NotifyClientAboutRefund(claim.ClaimNo, claim.Owner.Id);
+        }
+        else
+        {
+          claim.Status = Claim.Statuses.Escalated;
+          claim.CompletionDate = SystemClock.Instance.GetCurrentInstant();
+          claim.ChangeDate = SystemClock.Instance.GetCurrentInstant();
+          claim.CompletionMode = Claim.CompletionModes.Manual;
+          _clientNotificationService.AskForMoreInformation(claim.ClaimNo, claim.Owner.Id);
+        }
+      }
+      else
+      {
+        claim.Status = Claim.Statuses.Escalated;
+        claim.CompletionDate = SystemClock.Instance.GetCurrentInstant();
+        claim.ChangeDate = SystemClock.Instance.GetCurrentInstant();
+        claim.CompletionMode = Claim.CompletionModes.Manual;
+        _driverNotificationService.AskDriverForDetailsAboutClaim(claim.ClaimNo, claim.Owner.Id);
+      }
     }
 
     return claim;
