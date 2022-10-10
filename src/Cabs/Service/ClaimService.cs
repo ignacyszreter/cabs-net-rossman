@@ -95,6 +95,15 @@ public class ClaimService : IClaimService
   public async Task<Claim> TryToResolveAutomatically(long? id)
   {
     var claim = await Find(id);
+    if ((await _claimRepository.FindByOwnerAndTransit(claim.Owner, claim.Transit)).Count > 1)
+    {
+      claim.Status = Claim.Statuses.Escalated;
+      claim.CompletionDate = SystemClock.Instance.GetCurrentInstant();
+      claim.ChangeDate = SystemClock.Instance.GetCurrentInstant();
+      claim.CompletionMode = Claim.CompletionModes.Manual;
+      return claim;
+    }
+
     if ((await _claimRepository.FindByOwner(claim.Owner)).Count <= 3)
     {
       claim.Status = Claim.Statuses.Refunded;

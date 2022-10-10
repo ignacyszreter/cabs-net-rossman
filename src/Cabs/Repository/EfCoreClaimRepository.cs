@@ -8,6 +8,8 @@ public interface IClaimRepository
 {
   Task<List<Claim>> FindByOwner(Client owner);
 
+  Task<List<Claim>> FindByOwnerAndTransit(Client owner, Transit transit);
+
   Task<long> Count();
   Task<Claim> Find(long? id);
   Task<Claim> Save(Claim claim);
@@ -25,6 +27,11 @@ internal class EfCoreClaimRepository : IClaimRepository
   public async Task<List<Claim>> FindByOwner(Client owner)
   {
     return await _context.Claims.Where(c => c.Owner == owner).ToListAsync();
+  }
+
+  public async Task<List<Claim>> FindByOwnerAndTransit(Client owner, Transit transit)
+  {
+    return await _context.Claims.Where(c => c.Owner == owner && c.Transit == transit).ToListAsync();
   }
 
   public async Task<long> Count()
