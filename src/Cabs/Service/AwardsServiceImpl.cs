@@ -117,6 +117,13 @@ public class AwardsServiceImpl : IAwardsService
     }
   }
 
+  private bool IsSunday()
+  {
+    return _clock.GetCurrentInstant()
+      .InZone(DateTimeZoneProviders.Bcl.GetSystemDefault())
+      .LocalDateTime.DayOfWeek == IsoDayOfWeek.Sunday;
+  }
+
   public async Task<AwardedMiles> RegisterSpecialMiles(long? clientId, int miles)
   {
     var account = await _accountRepository.FindByClient(await _clientRepository.Find(clientId));
@@ -155,7 +162,29 @@ public class AwardsServiceImpl : IAwardsService
     {
       if (await CalculateBalance(clientId) >= miles && account.Active)
       {
-        var milesList = (await _milesRepository.FindAllByClient(client)).OrderBy(m => m.Date).ToList();
+        var milesList = await _milesRepository.FindAllByClient(client);
+        var transitsCounter = (await _transitRepository.FindByClient(client)).Count;
+        if (client.Claims.Count >= 3)
+        {
+          milesList = milesList.OrderBy(m => m.ExpirationDate.HasValue)
+            .ThenByDescending(m => m.ExpirationDate).ToList();
+        }
+        else if (client.Type == Client.Types.Vip)
+        {
+          milesList = milesList.OrderBy(m => m.IsSpecial).ThenBy(m => m.ExpirationDate).ToList();
+        }
+        else if (transitsCounter >= 15 && IsSunday())
+        {
+          milesList = milesList.OrderBy(m => m.IsSpecial).ThenBy(m => m.ExpirationDate).ToList();
+        }
+        else if (transitsCounter >= 15)
+        {
+          milesList = milesList.OrderBy(m => m.IsSpecial).ThenBy(m => m.Date).ToList();
+        }
+        else
+        {
+          milesList = milesList.OrderBy(m => m.Date).ToList();
+        }
 
         foreach (var iter in milesList) 
         {
