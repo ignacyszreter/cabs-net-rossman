@@ -20,6 +20,8 @@ public class SqLiteDbContext : DbContext
   public DbSet<Claim> Claims { get; set; }
   public DbSet<ClaimAttachment> ClaimAttachments { get; set; }
   public DbSet<Client> Clients { get; set; }
+  public DbSet<Contract> Contracts { get; set; }
+  public DbSet<ContractAttachment> ContractAttachments { get; set; }
   public DbSet<Driver> Drivers { get; set; }
   public DbSet<DriverAttribute> DriverAttributes { get; set; }
   public DbSet<DriverFee> DriverFees { get; set; }
@@ -111,6 +113,28 @@ public class SqLiteDbContext : DbContext
       builder.Property(c => c.ClientType).HasConversion<string>();
       builder.Property(c => c.DefaultPaymentType).HasConversion<string>();
       builder.HasMany(c => c.Claims).WithOne(c => c.Owner);
+    });
+    modelBuilder.Entity<Contract>(builder =>
+    {
+      builder.MapBaseEntityProperties();
+      builder.HasMany(c => c.Attachments).WithOne(a => a.Contract);
+      builder.Property(x => x.CreationDate).HasConversion(instantConverter).IsRequired();
+      builder.Property(x => x.AcceptedAt).HasConversion(instantConverter);
+      builder.Property(x => x.ChangeDate).HasConversion(instantConverter);
+      builder.Property(x => x.RejectedAt).HasConversion(instantConverter);
+      builder.Property(x => x.Status).HasConversion<string>().IsRequired();
+      builder.Property(x => x.ContractNo).IsRequired();
+    });
+    modelBuilder.Entity<ContractAttachment>(builder =>
+    {
+      builder.MapBaseEntityProperties();
+      builder.Property(x => x.Data).HasColumnType("BLOB");
+      builder.Property(x => x.CreationDate).HasConversion(instantConverter).IsRequired();
+      builder.Property(x => x.AcceptedAt).HasConversion(instantConverter);
+      builder.Property(x => x.ChangeDate).HasConversion(instantConverter);
+      builder.Property(x => x.RejectedAt).HasConversion(instantConverter);
+      builder.Property(x => x.Status).HasConversion<string>();
+      builder.HasOne(a => a.Contract).WithMany(c => c.Attachments);
     });
     modelBuilder.Entity<Driver>(e =>
     {
