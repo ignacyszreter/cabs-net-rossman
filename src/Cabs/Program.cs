@@ -69,6 +69,11 @@ builder.Services.AddTransient<IDriverSessionService>(ctx =>
     ctx.GetRequiredService<DriverSessionService>(),
     ctx.GetRequiredService<ITransactions>()));
 builder.Services.AddTransient<IGeocodingService, GeocodingService>();
+builder.Services.AddTransient<ContractService>();
+builder.Services.AddTransient<IContractService>(ctx => 
+  new TransactionalContractService(
+    ctx.GetRequiredService<ContractService>(), 
+    ctx.GetRequiredService<ITransactions>()));
 builder.Services.AddTransient<TransitService>();
 builder.Services.AddTransient<ITransitService>(ctx =>
   new TransactionalTransitService(
