@@ -23,6 +23,11 @@ public class DriverFeeService : IDriverFeeService
       throw new ArgumentException("transit does not exist, id = " + transitId);
     }
 
+    if (transit.DriversFee != null)
+    {
+      return transit.DriversFee.Value;
+    }
+
     var transitPrice = transit.Price ?? transit.EstimatedPrice.Value;
     var driverFee = await _driverFeeRepository.FindByDriver(transit.Driver);
     if (driverFee == null)

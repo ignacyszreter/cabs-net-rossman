@@ -141,5 +141,7 @@ public class Transit : BaseEntity
     CompleteAt = when;
   }
 
+  public int? DriversFee { get; set; }
+
   public int? EstimatedPrice { get; set; }
 }
