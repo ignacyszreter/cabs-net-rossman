@@ -79,6 +79,11 @@ builder.Services.AddTransient<ITransitService>(ctx =>
   new TransactionalTransitService(
     ctx.GetRequiredService<TransitService>(),
     ctx.GetRequiredService<ITransactions>()));
+builder.Services.AddTransient<TransitAnalyzer>();
+builder.Services.AddTransient<ITransitAnalyzer>(ctx =>
+  new TransactionalTransitAnalyzer(
+    ctx.GetRequiredService<TransitAnalyzer>(),
+    ctx.GetRequiredService<ITransactions>()));
 builder.Services.AddTransient<InvoiceGenerator>();
 builder.Services.AddTransient<DistanceCalculator>();
 builder.Services.AddTransient<ClaimNumberGenerator>();
