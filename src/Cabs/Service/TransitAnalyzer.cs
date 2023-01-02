@@ -68,7 +68,9 @@ public class TransitAnalyzer : ITransitAnalyzer
     if (t != null)
     {
       ts = ts
-        .Where(transit => transit.CompleteAt.Value.Plus(Duration.FromMinutes(15)) > transit.Published)
+        .Where(transit=>t.CompleteAt.Value.Plus(Duration.FromMinutes(15)) > transit.Started)
+        // Before 2018-01-01:
+        //.Where(transit => transit.CompleteAt.Value.Plus(Duration.FromMinutes(15)) > transit.Published)
         .ToList();
     }
 
