@@ -50,6 +50,7 @@ public class TransitDto
   }
 
   public List<DriverDto> ProposedDrivers { get; set; } = new();
+  public ClaimDto ClaimDto { get; set; }
   public AddressDto To { get; set; }
   public AddressDto From { get; set; }
   public CarType.CarClasses? CarClass { get; set; }
