@@ -45,7 +45,8 @@ public class DriverReportController
     driverReport.DriverDto = driverDto;
     var driver = await _driverRepository.Find(driverId);
     
-    foreach (var attr in driver.Attributes)
+    foreach (var attr in driver.Attributes
+      .Where(attr=> attr.Name != DriverAttribute.DriverAttributeNames.MedicalExaminationRemarks))
     {
       driverReport.Attributes.Add(new DriverAttributeDto(attr));
     }
