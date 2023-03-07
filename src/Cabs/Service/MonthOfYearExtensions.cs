@@ -1,4 +1,3 @@
-using System.Linq;
 using NodaTime;
 
 namespace LegacyFighter.Cabs.Service;

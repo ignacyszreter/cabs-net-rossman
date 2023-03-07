@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Data.Common;
 using LegacyFighter.Cabs.Common;
 using LegacyFighter.Cabs.Entity;

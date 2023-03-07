@@ -1,4 +1,3 @@
-using System.Linq;
 using LegacyFighter.Cabs.Common;
 
 namespace LegacyFighter.Cabs.Service;

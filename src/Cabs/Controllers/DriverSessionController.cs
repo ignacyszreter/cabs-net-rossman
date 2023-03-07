@@ -1,4 +1,3 @@
-using System.Linq;
 using LegacyFighter.Cabs.Dto;
 using LegacyFighter.Cabs.Service;
 using Microsoft.AspNetCore.Mvc;

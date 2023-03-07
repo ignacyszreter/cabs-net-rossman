@@ -1,4 +1,3 @@
-using System.Linq;
 using LegacyFighter.Cabs.Entity;
 using LegacyFighter.Cabs.Repository;
 

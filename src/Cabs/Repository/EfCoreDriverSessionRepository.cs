@@ -1,4 +1,3 @@
-using System.Linq;
 using LegacyFighter.Cabs.Entity;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
