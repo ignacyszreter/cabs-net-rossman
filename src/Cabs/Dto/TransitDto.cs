@@ -9,6 +9,8 @@ public class TransitDto
 
   private decimal _baseFee;
 
+  private Instant? _date;
+
   public TransitDto()
   {
 
@@ -22,7 +24,9 @@ public class TransitDto
       Price = new decimal(transit.Price.Value);
     }
 
+    _date = transit.DateTime;
     Status = transit.Status;
+    SetTariff(transit);
     foreach (var d in transit.ProposedDrivers) 
     {
       ProposedDrivers.Add(new DriverDto(d));
@@ -48,6 +52,37 @@ public class TransitDto
     CompleteAt = transit.CompleteAt;
 
   }
+
+  public float KmRate { get; private set; }
+
+  private void SetTariff(Transit transit)
+  {
+    var day = _date.Value.InZone( DateTimeZoneProviders.Bcl.GetSystemDefault()).LocalDateTime;
+
+    // wprowadzenie nowych cennikow od 1.01.2019
+    if (day.Year <= 2018)
+    {
+      KmRate = 1.0f;
+      Tariff = "Standard";
+      return;
+    }
+
+    switch (day.DayOfWeek)
+    {
+      case IsoDayOfWeek.Saturday:
+      case IsoDayOfWeek.Sunday:
+        KmRate = 1.5f;
+        Tariff = "Weekend";
+        break;
+      default:
+        KmRate = 1.0f;
+        Tariff = "Standard";
+        break;
+    }
+
+  }
+
+  public string Tariff { get; private set; }
 
   public List<DriverDto> ProposedDrivers { get; set; } = new();
   public ClaimDto ClaimDto { get; set; }

@@ -42,7 +42,7 @@ public class Transit : BaseEntity
   private Client.PaymentTypes? PaymentType { get; set; }
   public Instant? Date { get; private set; }
   private float _km;
-  public const int BaseFee = 9;
+  public const int BaseFee = 8;
 
   public CarType.CarClasses? CarType { get; set; }
   public virtual Driver Driver { get; set; }
@@ -89,7 +89,28 @@ public class Transit : BaseEntity
   private int CalculateCost()
   {
     var baseFee = BaseFee;
-    float kmRate = 1.0f;
+    float kmRate;
+    var day = DateTime.Value.InZone(DateTimeZoneProviders.Bcl.GetSystemDefault()).LocalDateTime;
+    // wprowadzenie nowych cennikow od 1.01.2019
+    if (day.Year <= 2018)
+    {
+      kmRate = 1.0f;
+      baseFee++;
+    }
+    else
+    {
+      // weekend
+      if (day.DayOfWeek == IsoDayOfWeek.Saturday || day.DayOfWeek == IsoDayOfWeek.Sunday)
+      {
+        kmRate = 1.5f;
+      }
+      else
+      {
+        // tydzień roboczy
+        kmRate = 1.0f;
+        baseFee++;
+      }
+    }
 
     var finalPrice = (int) Math.Round(_km * kmRate + baseFee);
     Price = finalPrice;
