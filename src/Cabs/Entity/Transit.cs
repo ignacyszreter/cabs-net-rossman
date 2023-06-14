@@ -99,16 +99,29 @@ public class Transit : BaseEntity
     }
     else
     {
-      // weekend
-      if (day.DayOfWeek == IsoDayOfWeek.Saturday || day.DayOfWeek == IsoDayOfWeek.Sunday)
+      // piątek i sobota po 17 do 6 następnego dnia
+      if ((day.DayOfWeek == IsoDayOfWeek.Friday && day.Hour >= 17) ||
+          (day.DayOfWeek == IsoDayOfWeek.Saturday && day.Hour <= 6) ||
+          (day.DayOfWeek == IsoDayOfWeek.Saturday && day.Hour >= 17) ||
+          (day.DayOfWeek == IsoDayOfWeek.Sunday && day.Hour <= 6))
       {
-        kmRate = 1.5f;
+        kmRate = 2.50f;
+        baseFee += 2;
       }
       else
       {
-        // tydzień roboczy
-        kmRate = 1.0f;
-        baseFee++;
+        // pozostałe godziny weekendu
+        if ((day.DayOfWeek == IsoDayOfWeek.Saturday && day.Hour > 6 && day.Hour < 17) ||
+            (day.DayOfWeek == IsoDayOfWeek.Sunday && day.Hour > 6))
+        {
+          kmRate = 1.5f;
+        }
+        else
+        {
+          // tydzień roboczy
+          kmRate = 1.0f;
+          baseFee++;
+        }
       }
     }
 

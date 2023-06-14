@@ -69,14 +69,51 @@ public class TransitDto
 
     switch (day.DayOfWeek)
     {
-      case IsoDayOfWeek.Saturday:
-      case IsoDayOfWeek.Sunday:
-        KmRate = 1.5f;
-        Tariff = "Weekend";
-        break;
-      default:
+      case IsoDayOfWeek.Monday:
+      case IsoDayOfWeek.Tuesday:
+      case IsoDayOfWeek.Wednesday:
+      case IsoDayOfWeek.Thursday:
         KmRate = 1.0f;
         Tariff = "Standard";
+        break;
+      case IsoDayOfWeek.Friday:
+        if (day.Hour < 17)
+        {
+          Tariff = "Standard";
+          KmRate = 1.0f;
+        }
+        else
+        {
+          Tariff = "Weekend+";
+          KmRate = 2.50f;
+        }
+
+        break;
+      case IsoDayOfWeek.Saturday:
+        if (day.Hour < 6 || day.Hour >= 17)
+        {
+          KmRate = 2.50f;
+          Tariff = "Weekend+";
+        }
+        else if (day.Hour < 17)
+        {
+          KmRate = 1.5f;
+          Tariff = "Weekend";
+        }
+
+        break;
+      case IsoDayOfWeek.Sunday:
+        if (day.Hour < 6)
+        {
+          KmRate = 2.50f;
+          Tariff = "Weekend+";
+        }
+        else
+        {
+          KmRate = 1.5f;
+          Tariff = "Weekend";
+        }
+
         break;
     }
 
