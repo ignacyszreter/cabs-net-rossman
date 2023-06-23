@@ -99,28 +99,36 @@ public class Transit : BaseEntity
     }
     else
     {
-      // piątek i sobota po 17 do 6 następnego dnia
-      if ((day.DayOfWeek == IsoDayOfWeek.Friday && day.Hour >= 17) ||
-          (day.DayOfWeek == IsoDayOfWeek.Saturday && day.Hour <= 6) ||
-          (day.DayOfWeek == IsoDayOfWeek.Saturday && day.Hour >= 17) ||
-          (day.DayOfWeek == IsoDayOfWeek.Sunday && day.Hour <= 6))
+      if (day.Month == 12 && day.Day == 31)
       {
-        kmRate = 2.50f;
-        baseFee += 2;
+        kmRate = 3.50f;
+        baseFee += 3;
       }
       else
       {
-        // pozostałe godziny weekendu
-        if ((day.DayOfWeek == IsoDayOfWeek.Saturday && day.Hour > 6 && day.Hour < 17) ||
-            (day.DayOfWeek == IsoDayOfWeek.Sunday && day.Hour > 6))
+        // piątek i sobota po 17 do 6 następnego dnia
+        if ((day.DayOfWeek == IsoDayOfWeek.Friday && day.Hour >= 17) ||
+            (day.DayOfWeek == IsoDayOfWeek.Saturday && day.Hour <= 6) ||
+            (day.DayOfWeek == IsoDayOfWeek.Saturday && day.Hour >= 17) ||
+            (day.DayOfWeek == IsoDayOfWeek.Sunday && day.Hour <= 6))
         {
-          kmRate = 1.5f;
+          kmRate = 2.50f;
+          baseFee += 2;
         }
         else
         {
-          // tydzień roboczy
-          kmRate = 1.0f;
-          baseFee++;
+          // pozostałe godziny weekendu
+          if ((day.DayOfWeek == IsoDayOfWeek.Saturday && day.Hour > 6 && day.Hour < 17) ||
+              (day.DayOfWeek == IsoDayOfWeek.Sunday && day.Hour > 6))
+          {
+            kmRate = 1.5f;
+          }
+          else
+          {
+            // tydzień roboczy
+            kmRate = 1.0f;
+            baseFee++;
+          }
         }
       }
     }

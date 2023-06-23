@@ -67,54 +67,62 @@ public class TransitDto
       return;
     }
 
-    switch (day.DayOfWeek)
+    if (day.Month == 12 && day.Day == 31)
     {
-      case IsoDayOfWeek.Monday:
-      case IsoDayOfWeek.Tuesday:
-      case IsoDayOfWeek.Wednesday:
-      case IsoDayOfWeek.Thursday:
-        KmRate = 1.0f;
-        Tariff = "Standard";
-        break;
-      case IsoDayOfWeek.Friday:
-        if (day.Hour < 17)
-        {
-          Tariff = "Standard";
+      Tariff = "Sylwester";
+      KmRate = 3.50f;
+    }
+    else
+    {
+      switch (day.DayOfWeek)
+      {
+        case IsoDayOfWeek.Monday:
+        case IsoDayOfWeek.Tuesday:
+        case IsoDayOfWeek.Wednesday:
+        case IsoDayOfWeek.Thursday:
           KmRate = 1.0f;
-        }
-        else
-        {
-          Tariff = "Weekend+";
-          KmRate = 2.50f;
-        }
+          Tariff = "Standard";
+          break;
+        case IsoDayOfWeek.Friday:
+          if (day.Hour < 17)
+          {
+            Tariff = "Standard";
+            KmRate = 1.0f;
+          }
+          else
+          {
+            Tariff = "Weekend+";
+            KmRate = 2.50f;
+          }
 
-        break;
-      case IsoDayOfWeek.Saturday:
-        if (day.Hour < 6 || day.Hour >= 17)
-        {
-          KmRate = 2.50f;
-          Tariff = "Weekend+";
-        }
-        else if (day.Hour < 17)
-        {
-          KmRate = 1.5f;
-          Tariff = "Weekend";
-        }
+          break;
+        case IsoDayOfWeek.Saturday:
+          if (day.Hour < 6 || day.Hour >= 17)
+          {
+            KmRate = 2.50f;
+            Tariff = "Weekend+";
+          }
+          else if (day.Hour < 17)
+          {
+            KmRate = 1.5f;
+            Tariff = "Weekend";
+          }
 
-        break;
-      case IsoDayOfWeek.Sunday:
-        if (day.Hour < 6)
-        {
-          KmRate = 2.50f;
-          Tariff = "Weekend+";
-        }
-        else
-        {
-          KmRate = 1.5f;
-          Tariff = "Weekend";
-        }
+          break;
+        case IsoDayOfWeek.Sunday:
+          if (day.Hour < 6)
+          {
+            KmRate = 2.50f;
+            Tariff = "Weekend+";
+          }
+          else
+          {
+            KmRate = 1.5f;
+            Tariff = "Weekend";
+          }
 
-        break;
+          break;
+      }
     }
 
   }
