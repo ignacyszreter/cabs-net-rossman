@@ -67,7 +67,8 @@ public class TransitDto
       return;
     }
 
-    if (day.Month == 12 && day.Day == 31)
+    if ((day.Month == 12 && day.Day == 31) ||
+        (day.DayOfYear == 1 && day.Hour <= 6))
     {
       Tariff = "Sylwester";
       KmRate = 3.50f;

@@ -99,7 +99,8 @@ public class Transit : BaseEntity
     }
     else
     {
-      if (day.Month == 12 && day.Day == 31)
+      if ((day.Month == 12 && day.Day == 31) ||
+          (day.Month == 1 && day.Day == 1 && day.Hour <= 6))
       {
         kmRate = 3.50f;
         baseFee += 3;
