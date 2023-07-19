@@ -41,6 +41,7 @@ public class Transit : BaseEntity
   private ClientPaymentStatuses? ClientPaymentStatus { get; set; }
   private Client.PaymentTypes? PaymentType { get; set; }
   public Instant? Date { get; private set; }
+  public int? Factor { get; set; }
   private float _km;
   public const int BaseFee = 8;
 
@@ -89,6 +90,12 @@ public class Transit : BaseEntity
   private int CalculateCost()
   {
     var baseFee = BaseFee;
+    var factorToCalculate = Factor;
+    if (factorToCalculate == null)
+    {
+      factorToCalculate = 1;
+    }
+
     float kmRate;
     var day = DateTime.Value.InZone(DateTimeZoneProviders.Bcl.GetSystemDefault()).LocalDateTime;
     // wprowadzenie nowych cennikow od 1.01.2019
@@ -134,7 +141,7 @@ public class Transit : BaseEntity
       }
     }
 
-    var finalPrice = (int) Math.Round(_km * kmRate + baseFee);
+    var finalPrice = (int) Math.Round(_km * kmRate * factorToCalculate.Value + baseFee);
     Price = finalPrice;
     return finalPrice;
   }

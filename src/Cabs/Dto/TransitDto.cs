@@ -7,6 +7,8 @@ public class TransitDto
 {
   public DriverDto Driver;
 
+  public int? Factor;
+
   private decimal _baseFee;
 
   private Instant? _date;
@@ -19,6 +21,7 @@ public class TransitDto
   public TransitDto(Transit transit)
   {
     Id = transit.Id;
+    Factor = transit.Factor;
     if (transit.Price != null)
     {
       Price = new decimal(transit.Price.Value);
