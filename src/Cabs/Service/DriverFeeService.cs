@@ -27,7 +27,7 @@ public class DriverFeeService : IDriverFeeService
       return transit.DriversFee.Value;
     }
 
-    var transitPrice = transit.Price ?? transit.EstimatedPrice.Value;
+    var transitPrice = transit.Price.Value;
     var driverFee = await _driverFeeRepository.FindByDriver(transit.Driver);
     if (driverFee == null)
     {

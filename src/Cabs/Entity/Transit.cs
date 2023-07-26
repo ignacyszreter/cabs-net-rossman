@@ -69,6 +69,7 @@ public class Transit : BaseEntity
     var estimated = CalculateCost();
 
     EstimatedPrice = estimated;
+    Price = null;
 
     return estimated;
   }
