@@ -1,3 +1,4 @@
+using System.Globalization;
 using LegacyFighter.Cabs.Common;
 using NodaTime;
 
@@ -142,7 +143,9 @@ public class Transit : BaseEntity
       }
     }
 
-    var finalPrice = (int) Math.Round(_km * kmRate * factorToCalculate.Value + baseFee);
+    var pricedecimal = new decimal(_km * kmRate * factorToCalculate.Value + baseFee);
+    pricedecimal = decimal.Round(pricedecimal, 2, MidpointRounding.ToPositiveInfinity);
+    var finalPrice = int.Parse(pricedecimal.ToString("0.00", CultureInfo.InvariantCulture).Replace(".", ""));
     Price = finalPrice;
     return finalPrice;
   }
