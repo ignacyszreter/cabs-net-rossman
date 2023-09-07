@@ -76,7 +76,10 @@ public class TransitDto
       return;
     }
 
-    if ((day.Month == 12 && day.Day == 31) ||
+    var year = day.Year;
+    var leap = ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
+
+    if (((leap && day.DayOfYear == 366) || (!leap && day.DayOfYear == 365)) ||
         (day.DayOfYear == 1 && day.Hour <= 6))
     {
       Tariff = "Sylwester";
