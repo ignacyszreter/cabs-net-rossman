@@ -233,6 +233,8 @@ public class TransitService : ITransitService
 
         var distanceToCheck = 0;
 
+        // Tested on production, works as expected.
+        // If you change this code and the system will collapse AGAIN, I'll find you...
         while (true)
         {
           if (transit.AwaitingDriversResponses
@@ -244,9 +246,9 @@ public class TransitService : ITransitService
           distanceToCheck++;
 
           // TODO FIXME: to refactor when the final business logic will be determined
-          if (transit.Published.Value.Plus(Duration.FromSeconds(120)) < _clock.GetCurrentInstant()
+          if (transit.Published.Value.Plus(Duration.FromSeconds(300)) < _clock.GetCurrentInstant()
               ||
-              (distanceToCheck >= 10)
+              (distanceToCheck >= 20)
               ||
               // Should it be here? How is it even possible due to previous status check above loop?
               (transit.Status == Transit.Statuses.Cancelled)
