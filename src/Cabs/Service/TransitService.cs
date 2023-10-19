@@ -262,7 +262,17 @@ public class TransitService : ITransitService
             return transit;
           }
 
-          var geocoded = _geocodingService.GeocodeAddress(transit.From);
+          var geocoded = new double[2];
+
+
+          try
+          {
+            geocoded = _geocodingService.GeocodeAddress(transit.From);
+          }
+          catch (Exception e)
+          {
+            // Geocoding failed! Ask Jessica or Bryan for some help if needed.
+          }
 
           var longitude = geocoded[1];
           var latitude = geocoded[0];
