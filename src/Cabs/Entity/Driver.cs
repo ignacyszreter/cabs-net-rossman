@@ -36,6 +36,7 @@ public class Driver : BaseEntity
   public string Photo { get; set; }
   public string DriverLicense { get; set; }
   public virtual DriverFee Fee { get; set; }
+  public bool Occupied { get; set; }
 
   public override bool Equals(object obj)
   {

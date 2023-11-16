@@ -422,6 +422,8 @@ public class TransitService : ITransitService
             transit.AcceptedAt = _clock.GetCurrentInstant();
             transit.Status = Transit.Statuses.TransitToPassenger;
             await _transitRepository.Save(transit);
+            driver.Occupied = true;
+            await _driverRepository.Save(driver);
           }
         }
       }
@@ -507,9 +509,11 @@ public class TransitService : ITransitService
       transit.Km = (float)_distanceCalculator.CalculateByMap(geoFrom[0], geoFrom[1], geoTo[0], geoTo[1]);
       transit.Status = Transit.Statuses.Completed;
       transit.CalculateFinalCosts();
+      driver.Occupied = false;
       transit.CompleteTransitAt(_clock.GetCurrentInstant());
       var driverFee = await _driverFeeService.CalculateDriverFee(transitId);
       transit.DriversFee = driverFee;
+      await _driverRepository.Save(driver);
       await _awardsService.RegisterMiles(transit.Client.Id, transitId);
       await _transitRepository.Save(transit);
       await _invoiceGenerator.Generate(transit.Price,
