@@ -26,6 +26,13 @@ public class TransactionalDriverSessionService : IDriverSessionService
     await tx.Commit();
   }
 
+  public async Task LogOutCurrentSession(long? driverId)
+  {
+    await using var tx = await _transactions.BeginTransaction();
+    await _inner.LogOutCurrentSession(driverId);
+    await tx.Commit();
+  }
+
   public Task<List<DriverSession>> FindByDriver(long? driverId)
   {
     return _inner.FindByDriver(driverId);

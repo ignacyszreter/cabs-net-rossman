@@ -44,6 +44,18 @@ public class DriverSessionService : IDriverSessionService
     session.LoggedOutAt = _clock.GetCurrentInstant();
   }
 
+  public async Task LogOutCurrentSession(long? driverId)
+  {
+    var session =
+      await _driverSessionRepository.FindTopByDriverAndLoggedOutAtIsNullOrderByLoggedAtDesc(
+        await _driverRepository.Find(driverId));
+    if (session != null)
+    {
+      session.LoggedOutAt = _clock.GetCurrentInstant();
+      await _carTypeService.UnregisterCar(session.CarClass);
+    }
+  }
+
   public async Task<List<DriverSession>> FindByDriver(long? driverId)
   {
     return await _driverSessionRepository.FindByDriver(await _driverRepository.Find(driverId));

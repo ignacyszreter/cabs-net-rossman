@@ -32,6 +32,13 @@ public class DriverSessionController
     return new OkResult();
   }
 
+  [HttpDelete("/drivers/{driverId}/driverSessions/")]
+  public async Task<IActionResult> LogOutCurrent( long? driverId)
+  {
+    await _driverSessionService.LogOutCurrentSession(driverId);
+    return new OkResult();
+  }
+
   [HttpGet("/drivers/{driverId}/driverSessions/")]
   public async Task<List<DriverSessionDto>> List( long? driverId)
   {

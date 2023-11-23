@@ -10,6 +10,8 @@ public interface IDriverSessionRepository
   Task<List<DriverSession>> FindAllByLoggedOutAtNullAndDriverInAndCarClassIn(ICollection<Driver> drivers,
     List<CarType.CarClasses?> carClasses);
 
+  Task<DriverSession> FindTopByDriverAndLoggedOutAtIsNullOrderByLoggedAtDesc(Driver driver);
+
   Task<List<DriverSession>> FindAllByDriverAndLoggedAtAfter(Driver driver, Instant since);
 
   Task<List<DriverSession>> FindByDriver(Driver driver);
@@ -33,6 +35,12 @@ internal class EfCoreDriverSessionRepository : IDriverSessionRepository
       d.LoggedOutAt == null && drivers.Contains(d.Driver) && carClasses.Contains(d.CarClass))
       .ToListAsync();
     return driverSessions;
+  }
+
+  public async Task<DriverSession> FindTopByDriverAndLoggedOutAtIsNullOrderByLoggedAtDesc(Driver driver)
+  {
+    return await _context.DriverSessions.Where(d => d.Driver == driver && d.LoggedOutAt == null)
+      .OrderByDescending(d => d.LoggedOutAt).FirstOrDefaultAsync();
   }
 
   public async Task<List<DriverSession>> FindAllByDriverAndLoggedAtAfter(Driver driver, Instant since)
