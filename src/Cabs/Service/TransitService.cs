@@ -350,7 +350,9 @@ public class TransitService : ITransitService
             foreach (var driverAvgPosition in driversAvgPositions) 
             {
               var driver = driverAvgPosition.Driver;
-              if (driver.Status == Driver.Statuses.Active)
+              if (driver.Status == Driver.Statuses.Active &&
+
+                  driver.Occupied == false)
               {
                 if (!transit.DriversRejections.Contains(driver))
                 {
