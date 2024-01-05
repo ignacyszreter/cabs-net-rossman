@@ -191,6 +191,13 @@ public class TransitService : ITransitService
       throw new ArgumentException("Transit does not exist, id = " + transitId);
     }
 
+    if (!new HashSet<Transit.Statuses?>
+        { Transit.Statuses.Draft, Transit.Statuses.WaitingForDriverAssignment, Transit.Statuses.TransitToPassenger }
+      .Contains(transit.Status))
+    {
+      throw new InvalidOperationException("Transit cannot be cancelled, id = " + transitId);
+    }
+
     if (transit.Driver != null)
     {
       _notificationService.NotifyAboutCancelledTransit(transit.Driver.Id, transitId);
