@@ -5,6 +5,7 @@ using NodaTime;
 
 namespace LegacyFighter.Cabs.Service;
 
+// If this class will still be here in 2022 I will quit.
 public class TransitService : ITransitService
 {
   private readonly IDriverRepository _driverRepository;
