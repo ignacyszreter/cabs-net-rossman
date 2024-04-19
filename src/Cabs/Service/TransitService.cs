@@ -427,13 +427,20 @@ public class TransitService : ITransitService
           }
           else
           {
-            transit.Driver = driver;
-            transit.AwaitingDriversResponses = 0;
-            transit.AcceptedAt = _clock.GetCurrentInstant();
-            transit.Status = Transit.Statuses.TransitToPassenger;
-            await _transitRepository.Save(transit);
-            driver.Occupied = true;
-            await _driverRepository.Save(driver);
+            if (transit.DriversRejections.Contains(driver))
+            {
+              throw new InvalidOperationException("Driver out of possible drivers, id = " + transitId);
+            }
+            else
+            {
+              transit.Driver = driver;
+              transit.AwaitingDriversResponses = 0;
+              transit.AcceptedAt = _clock.GetCurrentInstant();
+              transit.Status = Transit.Statuses.TransitToPassenger;
+              await _transitRepository.Save(transit);
+              driver.Occupied = true;
+              await _driverRepository.Save(driver);
+            }
           }
         }
       }
