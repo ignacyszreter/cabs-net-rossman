@@ -170,6 +170,11 @@ public class TransitService : ITransitService
       throw new ArgumentException("Transit does not exist, id = " + transitId);
     }
 
+    if (transit.Status == Transit.Statuses.Completed)
+    {
+      throw new InvalidOperationException("Address 'to' cannot be changed, id = " + transitId);
+    }
+
     // TODO FIXME later: add some exceptions handling
     var geoFrom = _geocodingService.GeocodeAddress(transit.From);
     var geoTo = _geocodingService.GeocodeAddress(newAddress);
