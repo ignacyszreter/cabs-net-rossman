@@ -53,7 +53,8 @@ public class CarType : BaseEntity
   {
     if (CarsCounter < MinNoOfCarsToActivateClass)
     {
-      throw new InvalidOperationException();
+      throw new InvalidOperationException("Cannot activate car class when less than " + MinNoOfCarsToActivateClass +
+                                      " cars in the fleet");
     }
 
     Status = Statuses.Active;
