@@ -124,6 +124,7 @@ public class DriverService : IDriverService
       }
     }
 
+    driver.Photo = photo;
     await _driverRepository.Save(driver);
   }
 
