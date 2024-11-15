@@ -2,6 +2,8 @@
 
 public class BaseEntity
 {
+  private int? Version { get; set; }
+
   public override int GetHashCode()
   {
     return GetType().GetHashCode();
