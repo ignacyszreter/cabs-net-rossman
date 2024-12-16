@@ -47,6 +47,10 @@ public class CarType : BaseEntity
   public void UnregisterCar()
   {
     CarsCounter--;
+    if (CarsCounter < 0)
+    {
+      throw new InvalidOperationException();
+    }
   }
 
   public void Activate()
