@@ -14,9 +14,9 @@ public class TransactionalDriverSessionService : IDriverSessionService
     _transactions = transactions;
   }
 
-  public Task<DriverSession> LogIn(long? driverId, string plateNumber, CarType.CarClasses? carClass)
+  public Task<DriverSession> LogIn(long? driverId, string plateNumber, CarType.CarClasses? carClass, string carBrand)
   {
-    return _inner.LogIn(driverId, plateNumber, carClass);
+    return _inner.LogIn(driverId, plateNumber, carClass, carBrand);
   }
 
   public async Task LogOut(long sessionId)

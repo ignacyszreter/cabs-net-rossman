@@ -5,6 +5,7 @@ namespace LegacyFighter.Cabs.Entity;
 
 public class DriverSession : BaseEntity
 {
+  public string CarBrand { get; set; }
   public Instant LoggedAt { get; set; }
   public Instant? LoggedOutAt { get; set; }
   public virtual Driver Driver { get; set; }

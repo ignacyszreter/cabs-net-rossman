@@ -21,7 +21,7 @@ public class DriverSessionController
   [HttpPost("/drivers/{driverId}/driverSessions/login")]
   public async Task<IActionResult> LogIn( long? driverId, [FromBody] DriverSessionDto dto)
   {
-    await _driverSessionService.LogIn(driverId, dto.PlatesNumber, dto.CarClass);
+    await _driverSessionService.LogIn(driverId, dto.PlatesNumber, dto.CarClass, dto.CarBrand);
     return new OkResult();
   }
 
