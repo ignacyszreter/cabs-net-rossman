@@ -1,5 +1,7 @@
+using System.Globalization;
 using LegacyFighter.Cabs.Entity;
 using LegacyFighter.Cabs.Repository;
+using NodaTime;
 
 namespace LegacyFighter.Cabs.Service;
 
@@ -22,6 +24,7 @@ public class ClaimNumberGenerator
       prefix = 1L;
     }
 
-    return prefix.ToString();
+    return count + "---" + claim.CreationDate.InZone(DateTimeZoneProviders.Bcl.GetSystemDefault())
+      .ToString("dd/MM/yyyy", CultureInfo.CreateSpecificCulture("en-US"));
   }
 }
