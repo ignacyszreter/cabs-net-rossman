@@ -44,6 +44,10 @@ public class SqLiteDbContext : DbContext
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
   {
     optionsBuilder.UseLazyLoadingProxies().UseSqlite(_connection);
+    optionsBuilder
+      .LogTo(Console.WriteLine)
+      .EnableSensitiveDataLogging()
+      .EnableDetailedErrors();
     base.OnConfiguring(optionsBuilder);
   }
 
