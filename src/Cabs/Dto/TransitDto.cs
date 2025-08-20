@@ -168,6 +168,11 @@ public class TransitDto
       return distance.ToString("0.000", usCulture) + "miles";
     }
 
+    if (unit == "m")
+    {
+      return Math.Round(_distance*1000).ToString(usCulture) + "m";
+    }
+
     throw new ArgumentException("Invalid unit " + unit);
   }
 
