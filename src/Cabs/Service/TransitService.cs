@@ -474,7 +474,7 @@ public class TransitService : ITransitService
     }
 
     transit.Status = Transit.Statuses.InTransit;
-    transit.Started = _clock.GetCurrentInstant();
+    transit.Started = SystemClock.Instance.GetCurrentInstant();
     await _transitRepository.Save(transit);
   }
 
