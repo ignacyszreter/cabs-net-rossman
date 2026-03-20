@@ -43,6 +43,7 @@ public class CarTypeService : ICarTypeService
     }
     else
     {
+      byCarClass.Description = carTypeDto.Description;
       return byCarClass;
     }
   }
