@@ -348,6 +348,8 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+*.ncrunchsolution
+CabsMain/Properties/launchSettings.json
 
 # JetBrains Rider / IntelliJ IDEA
 .idea/

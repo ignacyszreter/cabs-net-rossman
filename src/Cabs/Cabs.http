@@ -1,0 +1,129 @@
+# cabs na tagu `start`: przejazd od zamówienia do roszczenia (demo B1, ćw. 1.1)
+#
+# Start aplikacji:  dotnet run --project src/Cabs
+# Baza SQLite żyje w pamięci procesu, więc każde uruchomienie zaczyna od pustej bazy.
+# Żądania wykonuj od góry. Identyfikatory przechodzą przez zmienne klienta HTTP (Rider / IntelliJ).
+#
+# Enumy w JSON idą liczbami:
+#   carClass:            0 Eco, 1 Regular, 2 Van, 3 Premium
+#   client.type:         0 Normal, 1 Vip;   defaultPaymentType: 0 PrePaid, 1 PostPaid, 2 MonthlyInvoice
+#   driver.status:       0 Active, 1 Inactive
+#   transit.status:      0 Draft, 1 Cancelled, 2 WaitingForDriverAssignment, 3 DriverAssignmentFailed,
+#                        4 TransitToPassenger, 5 InTransit, 6 Completed
+#   claim.status:        0 Draft, 1 New, 2 InProcess, 3 Refunded, 4 Escalated, 5 Rejected
+# Kwoty (estimatedPrice, price, driverFee) są w groszach.
+
+@host = http://localhost:5286
+
+### 1. Flota: klasa auta Eco
+POST {{host}}/cartypes
+Content-Type: application/json
+
+{
+  "carClass": 0,
+  "description": "Eco"
+}
+
+> {% client.global.set("carTypeId", response.body.id); %}
+
+### 2. Flota: jedno auto klasy Eco
+POST {{host}}/cartypes/Eco/registerCar
+
+### 3. Flota: aktywacja klasy Eco
+POST {{host}}/cartypes/{{carTypeId}}/activate
+
+### 4. Klient
+POST {{host}}/clients
+Content-Type: application/json
+
+{
+  "name": "Jan",
+  "lastName": "Kowalski",
+  "type": 0,
+  "defaultPaymentType": 0
+}
+
+> {% client.global.set("clientId", response.body.id); %}
+
+### 5. Kierowca: rejestracja kandydata
+POST {{host}}/drivers?license=FARME100165AB5EW&firstName=Marek&lastName=Nowak
+
+> {% client.global.set("driverId", response.body.id); %}
+
+### 6. Kierowca: aktywacja
+POST {{host}}/drivers/{{driverId}}/activate
+
+### 7. Kierowca: początek zmiany
+POST {{host}}/drivers/{{driverId}}/driverSessions/login
+Content-Type: application/json
+
+{
+  "platesNumber": "WA 12345",
+  "carClass": 0,
+  "carBrand": "Toyota"
+}
+
+### 8. Kierowca: pozycja GPS
+# GeocodingService na `start` zwraca (1, 1) dla każdego adresu, więc kierowca stoi w (1, 1).
+POST {{host}}/driverPositions/
+Content-Type: application/json
+
+{
+  "driverId": {{driverId}},
+  "latitude": 1,
+  "longitude": 1
+}
+
+### 9. Zamówienie przejazdu: klient dostaje wycenę (estimatedPrice)
+POST {{host}}/transits/
+Content-Type: application/json
+
+{
+  "clientDto": { "id": {{clientId}} },
+  "from": { "country": "Polska", "city": "Warszawa", "street": "Młynarska", "buildingNumber": 20 },
+  "to":   { "country": "Polska", "city": "Warszawa", "street": "Żytnia", "buildingNumber": 25 },
+  "carClass": 0
+}
+
+> {% client.global.set("transitId", response.body.id); %}
+
+### 10. Podgląd przejazdu
+GET {{host}}/transits/{{transitId}}
+
+### 11. Publikacja: system szuka kierowców w okolicy (proposedDrivers)
+POST {{host}}/transits/{{transitId}}/publish
+
+### 12. Kierowca przyjmuje przejazd
+POST {{host}}/transits/{{transitId}}/accept/{{driverId}}
+
+### 13. Kierowca rusza z klientem
+POST {{host}}/transits/{{transitId}}/start/{{driverId}}
+
+### 14. Zakończenie przejazdu: cena końcowa, honorarium kierowcy, faktura
+# Na `start` kończy się wyjątkiem "driver Fees not defined": stawkę kierowcy trzyma tabela DriverFee,
+# a żaden endpoint jej nie zapisuje. Transakcja się cofa i przejazd zostaje w statusie 5 (InTransit).
+POST {{host}}/transits/{{transitId}}/complete/{{driverId}}
+Content-Type: application/json
+
+{
+  "country": "Polska",
+  "city": "Warszawa",
+  "street": "Żytnia",
+  "buildingNumber": 25
+}
+
+### 15. Roszczenie klienta
+POST {{host}}/claims/send
+Content-Type: application/json
+
+{
+  "clientId": {{clientId}},
+  "transitId": {{transitId}},
+  "reason": "Kierowca pojechał naokoło",
+  "incidentDescription": "Trasa dłuższa o 3 km niż w wycenie"
+}
+
+> {% client.global.set("claimId", response.body.claimId); %}
+
+### 16. Automatyczne rozstrzygnięcie roszczenia (pierwsze roszczenia klienta: zwrot, status 3)
+POST {{host}}/claims/{{claimId}}
