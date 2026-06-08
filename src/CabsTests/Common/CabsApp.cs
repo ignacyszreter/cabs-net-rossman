@@ -1,6 +1,7 @@
 using System;
 using LegacyFighter.Cabs.Service;
 using Microsoft.AspNetCore.Hosting;
+using LegacyFighter.Cabs.Repository;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -61,6 +62,15 @@ internal class CabsApp : WebApplicationFactory<Program>
   public IClientService ClientService
     => NewRequestScope().ServiceProvider.GetRequiredService<IClientService>();
 
+  public AddressRepository AddressRepository 
+    => NewRequestScope().ServiceProvider.GetRequiredService<AddressRepository>();
+
+  public ITransitRepository TransitRepository
+    => NewRequestScope().ServiceProvider.GetRequiredService<ITransitRepository>();
+
+  public IDriverFeeService DriverFeeService
+    => NewRequestScope().ServiceProvider.GetRequiredService<IDriverFeeService>();
+
   public IDriverService DriverService
     => NewRequestScope().ServiceProvider.GetRequiredService<IDriverService>();
 
@@ -79,4 +89,10 @@ internal class CabsApp : WebApplicationFactory<Program>
   public CabsApi Api => _api ??= new CabsApi(this);
 
   public Fixtures Fixtures => _fixtures ??= new Fixtures(Api, _clock, Services);
+
+  public IClientRepository ClientRepository
+    => NewRequestScope().ServiceProvider.GetRequiredService<IClientRepository>();
+
+  public IDriverFeeRepository DriverFeeRepository
+    => NewRequestScope().ServiceProvider.GetRequiredService<IDriverFeeRepository>();
 }
