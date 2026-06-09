@@ -36,7 +36,7 @@ public class TransitFromOrderToInvoice
     await Fixtures.DriverHasFlatFee(driver, 10);
     var (from, to) = Fixtures.AddressesOf42KmDistance();
 
-    var ordered = await Cabs.OrderTransit(await Fixtures.AClient(), from, to);
+    var ordered = await Cabs.OrderTransit(await Fixtures.ARegisteredClient(), from, to);
     Assert.AreEqual(11500, (int)ordered.EstimatedPrice);
     Assert.AreEqual("Weekend+", ordered.Tariff);
 

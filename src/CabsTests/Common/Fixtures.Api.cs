@@ -33,7 +33,7 @@ public partial class Fixtures
     return (AnAddress("Młynarska", 20), AnAddress("Żytnia", 25));
   }
 
-  public Task<long> AClient()
+  public Task<long> ARegisteredClient()
   {
     return _api.RegisterClient("Janusz", "Kowalski");
   }
@@ -68,7 +68,7 @@ public partial class Fixtures
 
   public async Task<long> ADraftTransitNow(AddressDto from, AddressDto to)
   {
-    var transit = await _api.OrderTransit(await AClient(), from, to);
+    var transit = await _api.OrderTransit(await ARegisteredClient(), from, to);
     return transit.Id!.Value;
   }
 

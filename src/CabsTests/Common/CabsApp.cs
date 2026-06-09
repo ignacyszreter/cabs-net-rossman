@@ -1,4 +1,5 @@
 using System;
+using LegacyFighter.Cabs.Controllers;
 using LegacyFighter.Cabs.Service;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -78,6 +79,9 @@ internal class CabsApp : WebApplicationFactory<Program>
 
   public ITransitService TransitService
     => NewRequestScope().ServiceProvider.GetRequiredService<ITransitService>();
+
+  public TransitController TransitController
+    => NewRequestScope().ServiceProvider.GetRequiredService<TransitController>();
 
   public CabsApi Api => _api ??= new CabsApi(this);
 
