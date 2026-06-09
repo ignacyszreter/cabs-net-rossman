@@ -98,13 +98,13 @@ internal class CabsApp : WebApplicationFactory<Program>
   public TransitController TransitController
     => RequestScope().ServiceProvider.GetRequiredService<TransitController>();
 
+  public ICarTypeService CarTypeService
+    => RequestScope().ServiceProvider.GetRequiredService<ICarTypeService>();
+
   public FakeClock Clock => _clock;
 
   public IClientService ClientService
     => RequestScope().ServiceProvider.GetRequiredService<IClientService>();
-
-  public ICarTypeService CarTypeService
-    => RequestScope().ServiceProvider.GetRequiredService<ICarTypeService>();
 
   public CabsApi Api => _api ??= new CabsApi(this);
 }
