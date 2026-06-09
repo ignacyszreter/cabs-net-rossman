@@ -55,7 +55,7 @@ public partial class Fixtures
       .Save(new DriverFee(DriverFee.FeeTypes.Flat, driver, amount, 0));
   }
 
-  public async Task AnActiveCarCategory(CarType.CarClasses carClass)
+  public async Task ARegisteredActiveCarCategory(CarType.CarClasses carClass)
   {
     var (carType, minNoOfCars) = await _api.RegisterCarType(carClass, "opis");
     for (var car = 0; car < minNoOfCars; car++)

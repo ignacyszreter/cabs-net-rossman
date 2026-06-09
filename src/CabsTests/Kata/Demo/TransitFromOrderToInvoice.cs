@@ -31,7 +31,7 @@ public class TransitFromOrderToInvoice
   [Test]
   public async Task FridayEveningTransitOf42KmCosts11500()
   {
-    await Fixtures.AnActiveCarCategory(CarType.CarClasses.Van);
+    await Fixtures.ARegisteredActiveCarCategory(CarType.CarClasses.Van);
     var driver = await Fixtures.ADriverNearby("WU1212");
     await Fixtures.DriverHasFlatFee(driver, 10);
     var (from, to) = Fixtures.AddressesOf42KmDistance();
