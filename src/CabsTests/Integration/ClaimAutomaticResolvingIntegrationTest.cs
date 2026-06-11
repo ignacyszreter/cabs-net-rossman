@@ -93,7 +93,7 @@ public class ClaimAutomaticResolvingIntegrationTest
     Assert.AreEqual(Claim.Statuses.Refunded, claim.Status);
     Assert.AreEqual(Claim.CompletionModes.Automatic, claim.CompletionMode);
     ClientNotificationService.Received(1).NotifyClientAboutRefund(claim.ClaimNo, claim.Owner.Id);
-    await AwardsService.Received(1).RegisterSpecialMiles(claim.Owner.Id, 10);
+    await AwardsService.Received(1).RegisterNonExpiringMiles(claim.Owner.Id, 10);
   }
 
   [Test]
