@@ -101,6 +101,9 @@ internal class CabsApp : WebApplicationFactory<Program>
   public ICarTypeService CarTypeService
     => RequestScope().ServiceProvider.GetRequiredService<ICarTypeService>();
 
+  public IClaimService ClaimService
+    => RequestScope().ServiceProvider.GetRequiredService<IClaimService>();
+
   public FakeClock Clock => _clock;
 
   public IClientService ClientService
