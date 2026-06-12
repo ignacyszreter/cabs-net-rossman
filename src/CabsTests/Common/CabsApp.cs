@@ -108,8 +108,8 @@ internal class CabsApp : WebApplicationFactory<Program>
   public IAwardsService AwardsService
     => RequestScope().ServiceProvider.GetRequiredService<IAwardsService>();
 
-  public IAwardedMilesRepository AwardedMilesRepository
-    => RequestScope().ServiceProvider.GetRequiredService<IAwardedMilesRepository>();
+  public IAwardsAccountRepository AwardsAccountRepository
+    => RequestScope().ServiceProvider.GetRequiredService<IAwardsAccountRepository>();
 
   public FakeClock Clock => _clock;
 
