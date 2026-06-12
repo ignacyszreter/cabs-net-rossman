@@ -64,7 +64,7 @@ internal class CabsApp : WebApplicationFactory<Program>
 
   protected override void Dispose(bool disposing)
   {
-    _scope.Dispose();
+    _scope?.Dispose();
     base.Dispose(disposing);
   }
 
