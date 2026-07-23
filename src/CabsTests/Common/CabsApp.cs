@@ -1,6 +1,7 @@
 using System;
 using LegacyFighter.Cabs.Controllers;
 using LegacyFighter.Cabs.DriverReports;
+using LegacyFighter.Cabs.DriverReports.TravelledDistances;
 using LegacyFighter.Cabs.Repository;
 using LegacyFighter.Cabs.Service;
 using Microsoft.AspNetCore.Hosting;
@@ -120,6 +121,9 @@ internal class CabsApp : WebApplicationFactory<Program>
 
   public AddressRepository AddressRepository
     => RequestScope().ServiceProvider.GetRequiredService<AddressRepository>();
+
+  public ITravelledDistanceService TravelledDistanceService
+    => RequestScope().ServiceProvider.GetRequiredService<ITravelledDistanceService>();
 
   public FakeClock Clock => _clock;
 
