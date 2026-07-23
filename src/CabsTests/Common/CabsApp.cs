@@ -114,6 +114,12 @@ internal class CabsApp : WebApplicationFactory<Program>
   public IContractService ContractService
     => RequestScope().ServiceProvider.GetRequiredService<IContractService>();
 
+  public DriverReportController DriverReportController 
+    => RequestScope().ServiceProvider.GetRequiredService<DriverReportController>();
+
+  public AddressRepository AddressRepository
+    => RequestScope().ServiceProvider.GetRequiredService<AddressRepository>();
+
   public FakeClock Clock => _clock;
 
   public IClientService ClientService
