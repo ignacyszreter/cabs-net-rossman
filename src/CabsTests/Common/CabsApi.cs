@@ -39,7 +39,7 @@ internal class CabsApi
 
   public async Task RegisterDriverPosition(long driverId, double latitude, double longitude)
   {
-    await _app.DriverTrackingService.RegisterPosition(driverId, latitude, longitude);
+    await _app.DriverTrackingService.RegisterPosition(driverId, latitude, longitude, _app.Clock.GetCurrentInstant());
   }
 
   public async Task<(long Id, int MinNoOfCars)> RegisterCarType(CarType.CarClasses carClass, string description)
