@@ -125,6 +125,9 @@ internal class CabsApp : WebApplicationFactory<Program>
   public ITravelledDistanceService TravelledDistanceService
     => RequestScope().ServiceProvider.GetRequiredService<ITravelledDistanceService>();
 
+  public TransitAnalyzerController TransitAnalyzerController
+    => RequestScope().ServiceProvider.GetRequiredService<TransitAnalyzerController>();
+
   public FakeClock Clock => _clock;
 
   public IClientService ClientService
