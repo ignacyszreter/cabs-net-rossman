@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using LegacyFighter.Cabs.Controllers;
 using LegacyFighter.Cabs.DriverReports;
 using LegacyFighter.Cabs.DriverReports.TravelledDistances;
+using LegacyFighter.Cabs.Repair.Api;
 using LegacyFighter.Cabs.Repair.Legacy.Service;
 using LegacyFighter.Cabs.Repository;
 using LegacyFighter.Cabs.Service;
@@ -162,6 +163,12 @@ internal class CabsApp : WebApplicationFactory<Program>
 
   public IJobDoer JobDoer
     => RequestScope().ServiceProvider.GetRequiredService<IJobDoer>();
+
+  public RepairProcess VehicleRepairProcess
+    => RequestScope().ServiceProvider.GetRequiredService<RepairProcess>();
+
+  public IContractManager ContractManager
+    => RequestScope().ServiceProvider.GetRequiredService<IContractManager>();
 
   public FakeClock Clock => _clock;
 
