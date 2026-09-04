@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using LegacyFighter.Cabs.Agreements;
 using LegacyFighter.Cabs.Contracts.Application.Acme.Dynamic;
 using LegacyFighter.Cabs.Contracts.Application.Acme.Straightforward;
 using LegacyFighter.Cabs.Contracts.Application.Editor;
