@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using LegacyFighter.Cabs.CarFleet;
 using LegacyFighter.Cabs.Dto;
 using LegacyFighter.Cabs.Entity;
 
@@ -32,7 +33,7 @@ internal class CabsApi
     await _app.DriverService.ChangeDriverStatus(driverId, Driver.Statuses.Active);
   }
 
-  public async Task LogInDriver(long driverId, string plateNumber, CarType.CarClasses carClass, string carBrand)
+  public async Task LogInDriver(long driverId, string plateNumber, CarClasses carClass, string carBrand)
   {
     await _app.DriverSessionService.LogIn(driverId, plateNumber, carClass, carBrand);
   }
@@ -42,14 +43,14 @@ internal class CabsApi
     await _app.DriverTrackingService.RegisterPosition(driverId, latitude, longitude, _app.Clock.GetCurrentInstant());
   }
 
-  public async Task<(long Id, int MinNoOfCars)> RegisterCarType(CarType.CarClasses carClass, string description)
+  public async Task<(long Id, int MinNoOfCars)> RegisterCarType(CarClasses carClass, string description)
   {
     var carType = await _app.CarTypeService.Create(
       new CarTypeDto { CarClass = carClass, Description = description });
     return (carType.Id!.Value, carType.MinNoOfCarsToActivateClass);
   }
 
-  public async Task RegisterCar(CarType.CarClasses carClass)
+  public async Task RegisterCar(CarClasses carClass)
   {
     await _app.CarTypeService.RegisterCar(carClass);
   }

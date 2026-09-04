@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using LegacyFighter.Cabs.CarFleet;
 using LegacyFighter.Cabs.Entity;
 using LegacyFighter.CabsTests.Common;
 using NodaTime;
@@ -31,7 +32,7 @@ public class TransitFromOrderToInvoice
   [Test]
   public async Task FridayEveningTransitOf42KmCosts11500()
   {
-    await Fixtures.ARegisteredActiveCarCategory(CarType.CarClasses.Van);
+    await Fixtures.ARegisteredActiveCarCategory(CarClasses.Van);
     var driver = await Fixtures.ADriverNearby("WU1212");
     await Fixtures.DriverHasFlatFee(driver, 10);
     var (from, to) = Fixtures.AddressesOf42KmDistance();

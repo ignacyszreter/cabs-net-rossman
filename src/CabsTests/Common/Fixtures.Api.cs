@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using LegacyFighter.Cabs.CarFleet;
 using LegacyFighter.Cabs.Dto;
 using LegacyFighter.Cabs.Entity;
 using LegacyFighter.Cabs.Repository;
@@ -42,7 +43,7 @@ public partial class Fixtures
   {
     var driver = await _api.RegisterDriver("FARME100165AB5EW", "Janusz", "Kowalski");
     await _api.ActivateDriver(driver);
-    await _api.LogInDriver(driver, plateNumber, CarType.CarClasses.Van, "BRAND");
+    await _api.LogInDriver(driver, plateNumber, CarClasses.Van, "BRAND");
     await _api.RegisterDriverPosition(driver, 1, 1);
     return driver;
   }
@@ -55,7 +56,7 @@ public partial class Fixtures
       .Save(new DriverFee(DriverFee.FeeTypes.Flat, driver, amount, 0));
   }
 
-  public async Task ARegisteredActiveCarCategory(CarType.CarClasses carClass)
+  public async Task ARegisteredActiveCarCategory(CarClasses carClass)
   {
     var (carType, minNoOfCars) = await _api.RegisterCarType(carClass, "opis");
     for (var car = 0; car < minNoOfCars; car++)
