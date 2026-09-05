@@ -6,7 +6,6 @@ using LegacyFighter.Cabs.Contracts.Application.Acme.Dynamic;
 using LegacyFighter.Cabs.Contracts.Application.Acme.Straightforward;
 using LegacyFighter.Cabs.Contracts.Application.Editor;
 using LegacyFighter.Cabs.Contracts.Legacy;
-using LegacyFighter.Cabs.Controllers;
 using LegacyFighter.Cabs.Crm;
 using LegacyFighter.Cabs.Crm.Claims;
 using LegacyFighter.Cabs.Crm.TransitAnalyzer;
@@ -15,10 +14,10 @@ using LegacyFighter.Cabs.DriverFleet.DriverReports;
 using LegacyFighter.Cabs.DriverFleet.DriverReports.TravelledDistances;
 using LegacyFighter.Cabs.Geolocation.Address;
 using LegacyFighter.Cabs.Loyalty;
+using LegacyFighter.Cabs.Pricing;
 using LegacyFighter.Cabs.Repair.Api;
 using LegacyFighter.Cabs.Repair.Legacy.Service;
-using LegacyFighter.Cabs.Repository;
-using LegacyFighter.Cabs.Service;
+using LegacyFighter.Cabs.Ride;
 using LegacyFighter.Cabs.Tracking;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -93,6 +92,7 @@ internal class CabsApp : WebApplicationFactory<Program>
       collection.AddTransient<RideFixture>();
       collection.AddTransient<StubbedTransitPrice>();
       collection.AddTransient<TransitFixture>();
+      collection.AddSingleton(Substitute.ForPartsOf<Tariffs>());
     });
     builder.ConfigureServices(collection =>
     {
@@ -205,6 +205,9 @@ internal class CabsApp : WebApplicationFactory<Program>
 
   public IAcmeContractProcessBasedOnStraightforwardDocumentModel AcmeContractProcessBasedOnStraightforwardDocumentModel
     => RequestScope().ServiceProvider.GetRequiredService<IAcmeContractProcessBasedOnStraightforwardDocumentModel>();
+
+  public RideFixture RideFixture
+    => RequestScope().ServiceProvider.GetRequiredService<RideFixture>();
 
   public FakeClock Clock => _clock;
 

@@ -1,10 +1,10 @@
+using System;
 using System.Threading.Tasks;
 using LegacyFighter.Cabs.CarFleet;
 using LegacyFighter.Cabs.Crm;
 using LegacyFighter.Cabs.DriverFleet;
-using LegacyFighter.Cabs.Dto;
-using LegacyFighter.Cabs.Entity;
 using LegacyFighter.Cabs.Geolocation.Address;
+using LegacyFighter.Cabs.Ride;
 
 namespace LegacyFighter.CabsTests.Common;
 
@@ -71,35 +71,35 @@ internal class CabsApi
       From = from,
       To = to
     });
-    return await FindTransit(transit.Id);
+    return await FindTransit(transit.RequestId);
   }
 
-  public async Task<TransitDto> PublishTransit(long? transitId)
+  public async Task<TransitDto> PublishTransit(Guid requestId)
   {
-    await _app.TransitService.PublishTransit(transitId);
-    return await FindTransit(transitId);
+    await _app.TransitService.PublishTransit(requestId);
+    return await FindTransit(requestId);
   }
 
-  public async Task<TransitDto> AcceptTransit(long? transitId, long driverId)
+  public async Task<TransitDto> AcceptTransit(Guid requestId, long driverId)
   {
-    await _app.TransitService.AcceptTransit(driverId, transitId);
-    return await FindTransit(transitId);
+    await _app.TransitService.AcceptTransit(driverId, requestId);
+    return await FindTransit(requestId);
   }
 
-  public async Task<TransitDto> StartTransit(long? transitId, long driverId)
+  public async Task<TransitDto> StartTransit(Guid requestId, long driverId)
   {
-    await _app.TransitService.StartTransit(driverId, transitId);
-    return await FindTransit(transitId);
+    await _app.TransitService.StartTransit(driverId, requestId);
+    return await FindTransit(requestId);
   }
 
-  public async Task<TransitDto> CompleteTransit(long? transitId, long driverId, AddressDto destination)
+  public async Task<TransitDto> CompleteTransit(Guid requestId, long driverId, AddressDto destination)
   {
-    await _app.TransitService.CompleteTransit(driverId, transitId, destination);
-    return await FindTransit(transitId);
+    await _app.TransitService.CompleteTransit(driverId, requestId, destination);
+    return await FindTransit(requestId);
   }
 
-  public async Task<TransitDto> FindTransit(long? transitId)
+  public async Task<TransitDto> FindTransit(Guid requestId)
   {
-    return await _app.TransitService.LoadTransit(transitId);
+    return await _app.TransitService.LoadTransit(requestId);
   }
 }

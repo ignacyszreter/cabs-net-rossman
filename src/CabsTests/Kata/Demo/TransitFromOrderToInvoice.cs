@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using LegacyFighter.Cabs.CarFleet;
-using LegacyFighter.Cabs.Entity;
+using LegacyFighter.Cabs.Ride;
+using LegacyFighter.Cabs.Ride.Details;
 using LegacyFighter.CabsTests.Common;
 using NodaTime;
 
@@ -41,12 +42,12 @@ public class TransitFromOrderToInvoice
     Assert.AreEqual(11500, (int)ordered.EstimatedPrice);
     Assert.AreEqual("Weekend+", ordered.Tariff);
 
-    await Cabs.PublishTransit(ordered.Id);
-    await Cabs.AcceptTransit(ordered.Id, driver);
-    await Cabs.StartTransit(ordered.Id, driver);
-    var completed = await Cabs.CompleteTransit(ordered.Id, driver, to);
+    await Cabs.PublishTransit(ordered.RequestId);
+    await Cabs.AcceptTransit(ordered.RequestId, driver);
+    await Cabs.StartTransit(ordered.RequestId, driver);
+    var completed = await Cabs.CompleteTransit(ordered.RequestId, driver, to);
 
-    Assert.AreEqual(Transit.Statuses.Completed, completed.Status);
+    Assert.AreEqual(Statuses.Completed, completed.Status);
     Assert.AreEqual(11500, (int?)completed.Price);
     Assert.AreEqual(11490, (int?)completed.DriverFee);
   }

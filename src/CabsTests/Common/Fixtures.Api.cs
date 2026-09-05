@@ -2,8 +2,6 @@ using System;
 using System.Threading.Tasks;
 using LegacyFighter.Cabs.CarFleet;
 using LegacyFighter.Cabs.DriverFleet;
-using LegacyFighter.Cabs.Dto;
-using LegacyFighter.Cabs.Entity;
 using LegacyFighter.Cabs.Geolocation.Address;
 using LegacyFighter.Cabs.Repository;
 using Microsoft.Extensions.DependencyInjection;
@@ -69,13 +67,13 @@ public partial class Fixtures
     await _api.ActivateCarType(carType);
   }
 
-  public async Task<long> ADraftTransitNow(AddressDto from, AddressDto to)
+  public async Task<Guid> ADraftTransitNow(AddressDto from, AddressDto to)
   {
     var transit = await _api.OrderTransit(await ARegisteredClient(), from, to);
-    return transit.Id!.Value;
+    return transit.RequestId;
   }
 
-  public async Task<long> ADraftTransitAt(Instant when, AddressDto from, AddressDto to)
+  public async Task<Guid> ADraftTransitAt(Instant when, AddressDto from, AddressDto to)
   {
     _clock.Reset(when);
     return await ADraftTransitNow(from, to);
