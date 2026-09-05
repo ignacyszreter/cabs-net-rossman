@@ -65,7 +65,7 @@ internal class CabsApi
 
   public async Task<TransitDto> OrderTransit(long clientId, AddressDto from, AddressDto to)
   {
-    var transit = await _app.TransitService.CreateTransit(new TransitDto
+    var transit = await _app.RideService.CreateTransit(new TransitDto
     {
       ClientDto = new ClientDto { Id = clientId },
       From = from,
@@ -76,30 +76,30 @@ internal class CabsApi
 
   public async Task<TransitDto> PublishTransit(Guid requestId)
   {
-    await _app.TransitService.PublishTransit(requestId);
+    await _app.RideService.PublishTransit(requestId);
     return await FindTransit(requestId);
   }
 
   public async Task<TransitDto> AcceptTransit(Guid requestId, long driverId)
   {
-    await _app.TransitService.AcceptTransit(driverId, requestId);
+    await _app.RideService.AcceptTransit(driverId, requestId);
     return await FindTransit(requestId);
   }
 
   public async Task<TransitDto> StartTransit(Guid requestId, long driverId)
   {
-    await _app.TransitService.StartTransit(driverId, requestId);
+    await _app.RideService.StartTransit(driverId, requestId);
     return await FindTransit(requestId);
   }
 
   public async Task<TransitDto> CompleteTransit(Guid requestId, long driverId, AddressDto destination)
   {
-    await _app.TransitService.CompleteTransit(driverId, requestId, destination);
+    await _app.RideService.CompleteTransit(driverId, requestId, destination);
     return await FindTransit(requestId);
   }
 
   public async Task<TransitDto> FindTransit(Guid requestId)
   {
-    return await _app.TransitService.LoadTransit(requestId);
+    return await _app.RideService.LoadTransit(requestId);
   }
 }
