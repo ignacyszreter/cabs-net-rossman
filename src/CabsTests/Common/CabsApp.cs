@@ -7,6 +7,7 @@ using LegacyFighter.Cabs.Contracts.Application.Acme.Straightforward;
 using LegacyFighter.Cabs.Contracts.Application.Editor;
 using LegacyFighter.Cabs.Contracts.Legacy;
 using LegacyFighter.Cabs.Controllers;
+using LegacyFighter.Cabs.Crm;
 using LegacyFighter.Cabs.Crm.Claims;
 using LegacyFighter.Cabs.Crm.TransitAnalyzer;
 using LegacyFighter.Cabs.DriverFleet;
