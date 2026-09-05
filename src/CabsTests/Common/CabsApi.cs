@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using LegacyFighter.Cabs.CarFleet;
+using LegacyFighter.Cabs.DriverFleet;
 using LegacyFighter.Cabs.Dto;
 using LegacyFighter.Cabs.Entity;
 
