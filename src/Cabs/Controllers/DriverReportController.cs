@@ -16,7 +16,6 @@ public class DriverReportController
   private readonly IDriverRepository _driverRepository;
   private readonly IClaimRepository _claimRepository;
   private readonly IDriverSessionRepository _driverSessionRepository;
-  private readonly IClock _clock;
   private readonly ITransactions _transactions;
 
   public DriverReportController(
@@ -24,14 +23,12 @@ public class DriverReportController
     IDriverRepository driverRepository,
     IClaimRepository claimRepository,
     IDriverSessionRepository driverSessionRepository,
-    IClock clock,
     ITransactions transactions)
   {
     _driverService = driverService;
     _driverRepository = driverRepository;
     _claimRepository = claimRepository;
     _driverSessionRepository = driverSessionRepository;
-    _clock = clock;
     _transactions = transactions;
   }
 
@@ -50,7 +47,7 @@ public class DriverReportController
       driverReport.Attributes.Add(new DriverAttributeDto(attr));
     }
     
-    var beggingOfToday = _clock.GetCurrentInstant().InZone(DateTimeZoneProviders.Bcl.GetSystemDefault())
+    var beggingOfToday = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime()).InZone(DateTimeZoneProviders.Bcl.GetSystemDefault())
       .LocalDateTime.Date.AtStartOfDayInZone(DateTimeZone.Utc).ToInstant();
     var since = beggingOfToday.Minus(Duration.FromDays(lastDays));
     var allByDriverAndLoggedAtAfter =

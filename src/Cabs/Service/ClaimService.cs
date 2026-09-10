@@ -8,7 +8,6 @@ namespace LegacyFighter.Cabs.Service;
 
 public class ClaimService : IClaimService
 {
-  private readonly IClock _clock;
   private readonly IClientRepository _clientRepository;
   private readonly ITransitRepository _transitRepository;
   private readonly IClaimRepository _claimRepository;
@@ -18,9 +17,8 @@ public class ClaimService : IClaimService
   private readonly IClientNotificationService _clientNotificationService;
   private readonly IDriverNotificationService _driverNotificationService;
 
-  public ClaimService(IClock clock, IClientRepository clientRepository, ITransitRepository transitRepository, IClaimRepository claimRepository, ClaimNumberGenerator claimNumberGenerator, IAppProperties appProperties, IAwardsService awardsService, IClientNotificationService clientNotificationService, IDriverNotificationService driverNotificationService)
+  public ClaimService(IClientRepository clientRepository, ITransitRepository transitRepository, IClaimRepository claimRepository, ClaimNumberGenerator claimNumberGenerator, IAppProperties appProperties, IAwardsService awardsService, IClientNotificationService clientNotificationService, IDriverNotificationService driverNotificationService)
   {
-    _clock = clock;
     _clientRepository = clientRepository;
     _transitRepository = transitRepository;
     _claimRepository = claimRepository;
@@ -35,7 +33,7 @@ public class ClaimService : IClaimService
   {
     var claim = new Claim
     {
-      CreationDate = _clock.GetCurrentInstant()
+      CreationDate = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime())
     };
     claim.ClaimNo = await _claimNumberGenerator.Generate(claim);
     claim = await Update(claimDto, claim);
@@ -78,7 +76,7 @@ public class ClaimService : IClaimService
 
     claim.Owner = client;
     claim.Transit = transit;
-    claim.CreationDate = _clock.GetCurrentInstant();
+    claim.CreationDate = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
     claim.Reason = claimDto.Reason;
     claim.IncidentDescription = claimDto.IncidentDescription;
     return await _claimRepository.Save(claim);
@@ -97,8 +95,8 @@ public class ClaimService : IClaimService
     if ((await _claimRepository.FindByOwnerAndTransit(claim.Owner, claim.Transit)).Count > 1)
     {
       claim.Status = Claim.Statuses.Escalated;
-      claim.CompletionDate = SystemClock.Instance.GetCurrentInstant();
-      claim.ChangeDate = SystemClock.Instance.GetCurrentInstant();
+      claim.CompletionDate = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
+      claim.ChangeDate = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
       claim.CompletionMode = Claim.CompletionModes.Manual;
       return claim;
     }
@@ -106,8 +104,8 @@ public class ClaimService : IClaimService
     if ((await _claimRepository.FindByOwner(claim.Owner)).Count <= 3)
     {
       claim.Status = Claim.Statuses.Refunded;
-      claim.CompletionDate = SystemClock.Instance.GetCurrentInstant();
-      claim.ChangeDate = SystemClock.Instance.GetCurrentInstant();
+      claim.CompletionDate = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
+      claim.ChangeDate = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
       claim.CompletionMode = Claim.CompletionModes.Automatic;
       _clientNotificationService.NotifyClientAboutRefund(claim.ClaimNo, claim.Owner.Id);
       return claim;
@@ -118,8 +116,8 @@ public class ClaimService : IClaimService
       if (claim.Transit.Price < _appProperties.AutomaticRefundForVipThreshold)
       {
         claim.Status = Claim.Statuses.Refunded;
-        claim.CompletionDate = SystemClock.Instance.GetCurrentInstant();
-        claim.ChangeDate = SystemClock.Instance.GetCurrentInstant();
+        claim.CompletionDate = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
+        claim.ChangeDate = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
         claim.CompletionMode = Claim.CompletionModes.Automatic;
         _clientNotificationService.NotifyClientAboutRefund(claim.ClaimNo, claim.Owner.Id);
         await _awardsService.RegisterSpecialMiles(claim.Owner.Id, 10);
@@ -127,8 +125,8 @@ public class ClaimService : IClaimService
       else
       {
         claim.Status = Claim.Statuses.Escalated;
-        claim.CompletionDate = SystemClock.Instance.GetCurrentInstant();
-        claim.ChangeDate = SystemClock.Instance.GetCurrentInstant();
+        claim.CompletionDate = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
+        claim.ChangeDate = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
         claim.CompletionMode = Claim.CompletionModes.Manual;
         _driverNotificationService.AskDriverForDetailsAboutClaim(claim.ClaimNo,
           claim.Transit.Driver.Id);
@@ -142,16 +140,16 @@ public class ClaimService : IClaimService
         if (claim.Transit.Price < _appProperties.AutomaticRefundForVipThreshold)
         {
           claim.Status = Claim.Statuses.Refunded;
-          claim.CompletionDate = SystemClock.Instance.GetCurrentInstant();
-          claim.ChangeDate = SystemClock.Instance.GetCurrentInstant();
+          claim.CompletionDate = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
+          claim.ChangeDate = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
           claim.CompletionMode = Claim.CompletionModes.Automatic;
           _clientNotificationService.NotifyClientAboutRefund(claim.ClaimNo, claim.Owner.Id);
         }
         else
         {
           claim.Status = Claim.Statuses.Escalated;
-          claim.CompletionDate = SystemClock.Instance.GetCurrentInstant();
-          claim.ChangeDate = SystemClock.Instance.GetCurrentInstant();
+          claim.CompletionDate = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
+          claim.ChangeDate = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
           claim.CompletionMode = Claim.CompletionModes.Manual;
           _clientNotificationService.AskForMoreInformation(claim.ClaimNo, claim.Owner.Id);
         }
@@ -159,8 +157,8 @@ public class ClaimService : IClaimService
       else
       {
         claim.Status = Claim.Statuses.Escalated;
-        claim.CompletionDate = SystemClock.Instance.GetCurrentInstant();
-        claim.ChangeDate = SystemClock.Instance.GetCurrentInstant();
+        claim.CompletionDate = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
+        claim.ChangeDate = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
         claim.CompletionMode = Claim.CompletionModes.Manual;
         _driverNotificationService.AskDriverForDetailsAboutClaim(claim.ClaimNo, claim.Owner.Id);
       }

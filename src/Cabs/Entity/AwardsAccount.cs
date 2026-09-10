@@ -10,7 +10,7 @@ public class AwardsAccount : BaseEntity
   }
 
   public virtual Client Client { set; get; }
-  public Instant Date { set; get; } = SystemClock.Instance.GetCurrentInstant();
+  public Instant Date { set; get; } = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
   public bool Active { set; get; } = false;
   public int Transactions { get; private set; } = 0;
 

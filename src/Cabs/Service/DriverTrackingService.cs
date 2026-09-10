@@ -9,14 +9,12 @@ public class DriverTrackingService : IDriverTrackingService
   private readonly IDriverPositionRepository _positionRepository;
   private readonly IDriverRepository _driverRepository;
   private readonly DistanceCalculator _distanceCalculator;
-  private IClock _clock;
 
-  public DriverTrackingService(IDriverPositionRepository positionRepository, IDriverRepository driverRepository, DistanceCalculator distanceCalculator, IClock clock)
+  public DriverTrackingService(IDriverPositionRepository positionRepository, IDriverRepository driverRepository, DistanceCalculator distanceCalculator)
   {
     _positionRepository = positionRepository;
     _driverRepository = driverRepository;
     _distanceCalculator = distanceCalculator;
-    _clock = clock;
   }
 
   public async Task<DriverPosition> RegisterPosition(long? driverId, double latitude, double longitude)
@@ -35,7 +33,7 @@ public class DriverTrackingService : IDriverTrackingService
     var position = new DriverPosition
     {
       Driver = driver,
-      SeenAt = SystemClock.Instance.GetCurrentInstant(),
+      SeenAt = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime()),
       Latitude = latitude,
       Longitude = longitude
     };

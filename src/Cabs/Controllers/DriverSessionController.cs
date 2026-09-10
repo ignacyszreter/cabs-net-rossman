@@ -10,12 +10,10 @@ namespace LegacyFighter.Cabs.Controllers;
 public class DriverSessionController
 {
   private readonly IDriverSessionService _driverSessionService;
-  private IClock _clock;
 
-  public DriverSessionController(IDriverSessionService driverSessionService, IClock clock)
+  public DriverSessionController(IDriverSessionService driverSessionService)
   {
     _driverSessionService = driverSessionService;
-    _clock = clock;
   }
 
   [HttpPost("/drivers/{driverId}/driverSessions/login")]

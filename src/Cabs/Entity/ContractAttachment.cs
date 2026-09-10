@@ -19,7 +19,7 @@ public class ContractAttachment : BaseEntity
   }
 
   public byte[] Data { get; set; }
-  public Instant CreationDate { get; set; } = SystemClock.Instance.GetCurrentInstant();
+  public Instant CreationDate { get; set; } = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
   public Instant AcceptedAt { get; set; }
   public Instant RejectedAt { get; set; }
   public Instant ChangeDate { get; set; }

@@ -18,7 +18,7 @@ public class AwardedMiles : BaseEntity
 
   public virtual Client Client { get; set; }
   public int Miles { get; set; }
-  public Instant Date { get; set; } = SystemClock.Instance.GetCurrentInstant();
+  public Instant Date { get; set; } = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
   public Instant? ExpirationDate { get; set; }
   public bool IsSpecial { get; set; }
   public virtual Transit Transit { get; set; }

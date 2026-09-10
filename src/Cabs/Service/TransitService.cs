@@ -20,7 +20,6 @@ public class TransitService : ITransitService
   private readonly IGeocodingService _geocodingService;
   private readonly AddressRepository _addressRepository;
   private readonly IDriverFeeService _driverFeeService;
-  private readonly IClock _clock;
   private readonly IAwardsService _awardsService;
 
   public TransitService(
@@ -36,7 +35,6 @@ public class TransitService : ITransitService
     IGeocodingService geocodingService,
     AddressRepository addressRepository,
     IDriverFeeService driverFeeService,
-    IClock clock,
     IAwardsService awardsService)
   {
     _driverRepository = driverRepository;
@@ -51,7 +49,6 @@ public class TransitService : ITransitService
     _geocodingService = geocodingService;
     _addressRepository = addressRepository;
     _driverFeeService = driverFeeService;
-    _clock = clock;
     _awardsService = awardsService;
   }
 
@@ -88,7 +85,7 @@ public class TransitService : ITransitService
     transit.To = to;
     transit.CarType = carClass;
     transit.Status = Transit.Statuses.Draft;
-    transit.DateTime = _clock.GetCurrentInstant();
+    transit.DateTime = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
     transit.Km = (float)_distanceCalculator.CalculateByMap(geoFrom[0], geoFrom[1], geoTo[0], geoTo[1]);
 
     return await _transitRepository.Save(transit);
@@ -226,7 +223,7 @@ public class TransitService : ITransitService
     }
 
     transit.Status = Transit.Statuses.WaitingForDriverAssignment;
-    transit.Published = _clock.GetCurrentInstant();
+    transit.Published = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
     await _transitRepository.Save(transit);
 
     return await FindDriversForTransit(transitId);
@@ -259,7 +256,7 @@ public class TransitService : ITransitService
           distanceToCheck++;
 
           // TODO FIXME: to refactor when the final business logic will be determined
-          if (transit.Published.Value.Plus(Duration.FromSeconds(300)) < _clock.GetCurrentInstant()
+          if (transit.Published.Value.Plus(Duration.FromSeconds(300)) < Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime())
               ||
               (distanceToCheck >= 20)
               ||
@@ -313,7 +310,7 @@ public class TransitService : ITransitService
 
           var driversAvgPositions = await _driverPositionRepository
             .FindAverageDriverPositionSince(latitudeMin, latitudeMax, longitudeMin, longitudeMax,
-              _clock.GetCurrentInstant().Minus(Duration.FromMinutes(5)));
+              Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime()).Minus(Duration.FromMinutes(5)));
 
           if (driversAvgPositions.Any())
           {
@@ -440,7 +437,7 @@ public class TransitService : ITransitService
             {
               transit.Driver = driver;
               transit.AwaitingDriversResponses = 0;
-              transit.AcceptedAt = _clock.GetCurrentInstant();
+              transit.AcceptedAt = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
               transit.Status = Transit.Statuses.TransitToPassenger;
               await _transitRepository.Save(transit);
               driver.Occupied = true;
@@ -474,7 +471,7 @@ public class TransitService : ITransitService
     }
 
     transit.Status = Transit.Statuses.InTransit;
-    transit.Started = SystemClock.Instance.GetCurrentInstant();
+    transit.Started = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
     await _transitRepository.Save(transit);
   }
 
@@ -532,7 +529,7 @@ public class TransitService : ITransitService
       transit.Status = Transit.Statuses.Completed;
       transit.CalculateFinalCosts();
       driver.Occupied = false;
-      transit.CompleteTransitAt(_clock.GetCurrentInstant());
+      transit.CompleteTransitAt(Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime()));
       var driverFee = await _driverFeeService.CalculateDriverFee(transitId);
       transit.DriversFee = driverFee;
       await _driverRepository.Save(driver);

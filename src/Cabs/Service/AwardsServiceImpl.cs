@@ -12,7 +12,6 @@ public class AwardsServiceImpl : IAwardsService
   private readonly IAwardedMilesRepository _milesRepository;
   private readonly IClientRepository _clientRepository;
   private readonly ITransitRepository _transitRepository;
-  private readonly IClock _clock;
   private readonly IAppProperties _appProperties;
 
   public AwardsServiceImpl(
@@ -20,14 +19,12 @@ public class AwardsServiceImpl : IAwardsService
     IAwardedMilesRepository milesRepository,
     IClientRepository clientRepository,
     ITransitRepository transitRepository,
-    IClock clock,
     IAppProperties appProperties)
   {
     _accountRepository = accountRepository;
     _milesRepository = milesRepository;
     _clientRepository = clientRepository;
     _transitRepository = transitRepository;
-    _clock = clock;
     _appProperties = appProperties;
   }
 
@@ -49,7 +46,7 @@ public class AwardsServiceImpl : IAwardsService
     {
       Client = client,
       Active = false,
-      Date = _clock.GetCurrentInstant()
+      Date = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime())
     };
 
     await _accountRepository.Save(account);
@@ -92,7 +89,7 @@ public class AwardsServiceImpl : IAwardsService
       throw new ArgumentException("transit does not exists, id = " + transitId);
     }
 
-    var now = _clock.GetCurrentInstant();
+    var now = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
     if (account == null || !account.Active)
     {
       return null;
@@ -102,7 +99,7 @@ public class AwardsServiceImpl : IAwardsService
       var miles = new AwardedMiles
       {
         Transit = transit,
-        Date = _clock.GetCurrentInstant(),
+        Date = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime()),
         Client = account.Client,
         Miles = _appProperties.DefaultMilesBonus,
         ExpirationDate = now.Plus(Duration.FromDays(_appProperties.MilesExpirationInDays)),
@@ -118,7 +115,7 @@ public class AwardsServiceImpl : IAwardsService
 
   private bool IsSunday()
   {
-    return _clock.GetCurrentInstant()
+    return Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime())
       .InZone(DateTimeZoneProviders.Bcl.GetSystemDefault())
       .LocalDateTime.DayOfWeek == IsoDayOfWeek.Sunday;
   }
@@ -138,7 +135,7 @@ public class AwardsServiceImpl : IAwardsService
         Transit = null,
         Client = account.Client,
         Miles = miles,
-        Date = _clock.GetCurrentInstant(),
+        Date = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime()),
         IsSpecial = true
       };
       account.IncreaseTransactions();
@@ -192,7 +189,7 @@ public class AwardsServiceImpl : IAwardsService
             break;
           }
 
-          if (iter.IsSpecial || iter.ExpirationDate > _clock.GetCurrentInstant())
+          if (iter.IsSpecial || iter.ExpirationDate > Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime()))
           {
             if (iter.Miles <= miles)
             {
@@ -224,7 +221,7 @@ public class AwardsServiceImpl : IAwardsService
 
     var sum = milesList.Where(t => 
         t.ExpirationDate != null && 
-        t.ExpirationDate > _clock.GetCurrentInstant() || 
+        t.ExpirationDate > Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime()) || 
         t.IsSpecial)
       .Select(t => t.Miles).Sum();
 
@@ -252,7 +249,7 @@ public class AwardsServiceImpl : IAwardsService
 
       foreach(var iter in milesList) 
       {
-        if (iter.IsSpecial || iter.ExpirationDate > _clock.GetCurrentInstant())
+        if (iter.IsSpecial || iter.ExpirationDate > Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime()))
         {
           if (iter.Miles <= miles)
           {
