@@ -17,7 +17,7 @@ public class Contract : BaseEntity
   {
   }
 
-  public Instant CreationDate { get; set; } = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
+  public Instant CreationDate { get; set; } = SystemClock.Instance.GetCurrentInstant();
   public Instant? AcceptedAt { get; set; }
   public Instant? RejectedAt { get; set; }
   public Instant? ChangeDate { get; set; }

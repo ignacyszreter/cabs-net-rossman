@@ -9,12 +9,14 @@ public class DriverSessionService : IDriverSessionService
   private readonly IDriverRepository _driverRepository;
   private readonly IDriverSessionRepository _driverSessionRepository;
   private readonly ICarTypeService _carTypeService;
+  private readonly IClock _clock;
 
-  public DriverSessionService(IDriverRepository driverRepository, IDriverSessionRepository driverSessionRepository, ICarTypeService carTypeService)
+  public DriverSessionService(IDriverRepository driverRepository, IDriverSessionRepository driverSessionRepository, ICarTypeService carTypeService, IClock clock)
   {
     _driverRepository = driverRepository;
     _driverSessionRepository = driverSessionRepository;
     _carTypeService = carTypeService;
+    _clock = clock;
   }
 
   public async Task<DriverSession> LogIn(long? driverId, string plateNumber, CarType.CarClasses? carClass, string carBrand)
@@ -22,7 +24,7 @@ public class DriverSessionService : IDriverSessionService
     var session = new DriverSession
     {
       Driver = await _driverRepository.Find(driverId),
-      LoggedAt = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime()),
+      LoggedAt = _clock.GetCurrentInstant(),
       CarClass = carClass,
       PlatesNumber = plateNumber,
       CarBrand = carBrand
@@ -40,7 +42,7 @@ public class DriverSessionService : IDriverSessionService
     }
 
     await _carTypeService.UnregisterCar(session.CarClass);
-    session.LoggedOutAt = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
+    session.LoggedOutAt = _clock.GetCurrentInstant();
   }
 
   public async Task LogOutCurrentSession(long? driverId)
@@ -50,7 +52,7 @@ public class DriverSessionService : IDriverSessionService
         await _driverRepository.Find(driverId));
     if (session != null)
     {
-      session.LoggedOutAt = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
+      session.LoggedOutAt = _clock.GetCurrentInstant();
       await _carTypeService.UnregisterCar(session.CarClass);
     }
   }
