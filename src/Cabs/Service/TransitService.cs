@@ -20,6 +20,7 @@ public class TransitService : ITransitService
   private readonly IGeocodingService _geocodingService;
   private readonly AddressRepository _addressRepository;
   private readonly IDriverFeeService _driverFeeService;
+  private readonly IClock _clock;
   private readonly IAwardsService _awardsService;
 
   public TransitService(
@@ -35,6 +36,7 @@ public class TransitService : ITransitService
     IGeocodingService geocodingService,
     AddressRepository addressRepository,
     IDriverFeeService driverFeeService,
+    IClock clock,
     IAwardsService awardsService)
   {
     _driverRepository = driverRepository;
@@ -49,6 +51,7 @@ public class TransitService : ITransitService
     _geocodingService = geocodingService;
     _addressRepository = addressRepository;
     _driverFeeService = driverFeeService;
+    _clock = clock;
     _awardsService = awardsService;
   }
 
@@ -85,7 +88,7 @@ public class TransitService : ITransitService
     transit.To = to;
     transit.CarType = carClass;
     transit.Status = Transit.Statuses.Draft;
-    transit.DateTime = Instant.FromDateTimeUtc(DateTime.Now.ToUniversalTime());
+    transit.DateTime = _clock.GetCurrentInstant();
     transit.Km = (float)_distanceCalculator.CalculateByMap(geoFrom[0], geoFrom[1], geoTo[0], geoTo[1]);
 
     return await _transitRepository.Save(transit);
