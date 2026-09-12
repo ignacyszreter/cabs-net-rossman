@@ -516,7 +516,21 @@ graph LR
 
 | cluster | symptom | confidence | joint commits |
 |---|---|---|---|
+| 1 | silent drift — two copies of one rule | high | 16 |
 | 3 | registration coupling — not a finding | high | 12 |
+
+> **Silent drift — two copies of one rule** · cluster 1 · confidence: high
+> **Evidence:** `Transit.CalculateCost` and `TransitDto.SetTariff` set the km rate of one tariff in
+> one commit four times — `0ff849d`, `cea3b15`, `3f9cda8`, `77ed03c` — and every message names the
+> price list: "Nowy cennik od 1.01.2019: taryfa weekendowa", "Taryfa Weekend+: piątek i sobota po 17
+> do 6 rano", "Taryfa sylwestrowa", "taryfa sylwestrowa obowiązuje do 6 rano 1 stycznia".
+> **What it means:** the tariff rule is implemented twice — the entity computes the price, the DTO
+> computes the rate and the tariff name the client reads — so the two copies can disagree and nothing
+> has to fail for that to happen.
+> **Move:** change one copy by hand — set the Sylwester rate in `TransitDto.SetTariff` to `4.50f` —
+> and run `dotnet test src/CabsTests`. Green means nothing guards the rate the client reads.
+> **What would disprove it:** the suite goes red on the one-sided change. Or the paired edits are
+> unrelated: one changes the price, the other only renames a label.
 
 > **Registration coupling — not a finding** · cluster 3 · confidence: high
 > **Evidence:** `Program.cs` and `SqLiteDbContext.cs` change in one commit 12 times — `af205a0`,
@@ -529,7 +543,7 @@ graph LR
 > **What would disprove it:** `Program.cs` or `SqLiteDbContext.cs` carries a business rule of its own
 > — a rate, a threshold, a branch on a domain value. Then it is a finding.
 
-I read the joint commits of all 8 clusters. Clusters 1, 2, 4, 5, 6, 7 and 8 match no row of the
+I read the joint commits of all 8 clusters. Clusters 2, 4, 5, 6, 7 and 8 match no row of the
 catalogue, and their numbers already stand in sections 1 to 3.
 
 ## How to reproduce

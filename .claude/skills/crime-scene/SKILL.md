@@ -74,30 +74,33 @@ one block per row:
 
 | cluster | symptom | confidence | joint commits |
 |---|---|---|---|
-| 2 | registration coupling — not a finding | high | 12 |
+| 1 | silent drift — two copies of one rule | high | 13 |
+| 2 | registration coupling | high | 12 |
 
 "Joint commits" is copied from section 3. Each block names the symptom from the catalogue and
 gives the six fields:
 
-> **Registration coupling — not a finding** · cluster 2 · confidence: high
-> **Evidence:** `Program.cs` and `AppDbContext.cs` change in one commit 12 times — `a1b2c3d`,
-> `b2c3d4e`, `c3d4e5f` — and every message names a new entity.
-> **What it means:** the framework demands the registration — a new entity needs a mapping and its
-> repository needs a DI line; the design is fine.
-> **Move:** none.
-> **What would disprove it:** the registration file carries a business rule of its own — a rate, a
-> threshold, a branch on a domain value. Then it is a finding.
+> **Silent drift — two copies of one rule** · cluster 1 · confidence: high
+> **Evidence:** `Order.CalculateTotal` and `OrderDto.SetDiscount` change in one commit four
+> times — `a1b2c3d`, `b2c3d4e`, `c3d4e5f`, `d4e5f6a` — and every message names the discount.
+> **What it means:** the discount rule is implemented twice, so the two copies can disagree and
+> nothing has to fail for that to happen.
+> **Move:** change one copy by hand and run the test suite. Green means nothing guards the rule.
+> **What would disprove it:** the suite goes red on the one-sided change. Or the two edits are
+> unrelated: one renames a field, the other changes a query.
 
-A diagnosis without the last field is an opinion. Two more rules:
+A diagnosis without the last field is an opinion. Three more rules:
 
 - **Registration coupling is a symptom to use, not to avoid.** A cluster of `Program.cs`, the
   `DbContext` and a new type per commit is the framework at work. A run that finds a design
   problem in every cluster has found nothing.
-- **The catalogue is the whole vocabulary.** A cluster that does not match the row gets no name and
+- **Silent drift stops at the drift.** History shows two copies; it cannot show whether a test
+  guards them. Report the two copies and hand over the one-command move.
+- **The catalogue is the whole vocabulary.** A cluster that matches neither row gets no name and
   no block — its numbers already stand in sections 1 to 3. Confidence is low whenever the naming
   rests on diffs alone.
 
-When no cluster matches the row, section 5 is one sentence: how many clusters you read, and that
+When no cluster matches either row, section 5 is one sentence: how many clusters you read, and that
 the catalogue held no name for them. That sentence is a result, not a gap.
 
 ## Step 4 — close the file
