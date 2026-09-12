@@ -4,17 +4,21 @@ using LegacyFighter.Cabs.Dto;
 using LegacyFighter.Cabs.Entity;
 using LegacyFighter.Cabs.Repository;
 using Microsoft.Extensions.DependencyInjection;
+using NodaTime;
+using NodaTime.Testing;
 
 namespace LegacyFighter.CabsTests.Common;
 
 internal class Fixtures
 {
   private readonly CabsApi _api;
+  private readonly FakeClock _clock;
   private readonly IServiceProvider _services;
 
-  public Fixtures(CabsApi api, IServiceProvider services)
+  public Fixtures(CabsApi api, FakeClock clock, IServiceProvider services)
   {
     _api = api;
+    _clock = clock;
     _services = services;
   }
 
@@ -65,5 +69,11 @@ internal class Fixtures
   {
     var transit = await _api.OrderTransit(await AClient(), from, to);
     return transit.Id!.Value;
+  }
+
+  public async Task<long> ADraftTransitAt(Instant when, AddressDto from, AddressDto to)
+  {
+    _clock.Reset(when);
+    return await ADraftTransitNow(from, to);
   }
 }

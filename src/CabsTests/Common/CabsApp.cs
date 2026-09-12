@@ -3,12 +3,16 @@ using LegacyFighter.Cabs.Service;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using NodaTime;
+using NodaTime.Testing;
 
 namespace LegacyFighter.CabsTests.Common;
 
 internal class CabsApp : WebApplicationFactory<Program>
 {
   private readonly Action<IServiceCollection> _customization;
+  private readonly FakeClock _clock = new(SystemClock.Instance.GetCurrentInstant());
   private IServiceScope _scope;
   private CabsApi? _api;
   private Fixtures? _fixtures;
@@ -31,6 +35,11 @@ internal class CabsApp : WebApplicationFactory<Program>
 
   protected override void ConfigureWebHost(IWebHostBuilder builder)
   {
+    builder.ConfigureServices(collection =>
+    {
+      collection.RemoveAll<IClock>();
+      collection.AddSingleton<IClock>(_clock);
+    });
     builder.ConfigureServices(_customization);
   }
 
@@ -46,6 +55,8 @@ internal class CabsApp : WebApplicationFactory<Program>
     _scope = Services.CreateAsyncScope();
     return _scope;
   }
+
+  public FakeClock Clock => _clock;
 
   public IClientService ClientService
     => NewRequestScope().ServiceProvider.GetRequiredService<IClientService>();
@@ -67,5 +78,5 @@ internal class CabsApp : WebApplicationFactory<Program>
 
   public CabsApi Api => _api ??= new CabsApi(this);
 
-  public Fixtures Fixtures => _fixtures ??= new Fixtures(Api, Services);
+  public Fixtures Fixtures => _fixtures ??= new Fixtures(Api, _clock, Services);
 }

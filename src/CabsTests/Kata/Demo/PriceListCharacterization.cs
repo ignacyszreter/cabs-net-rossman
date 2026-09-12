@@ -6,6 +6,8 @@ namespace LegacyFighter.CabsTests.Kata.Demo;
 
 public class PriceListCharacterization
 {
+  private static readonly DateTimeZone Warsaw = DateTimeZoneProviders.Tzdb["Europe/Warsaw"];
+
   private CabsApp _app = default!;
 
   [SetUp]
@@ -18,6 +20,18 @@ public class PriceListCharacterization
   public void TearDown()
   {
     _app.Dispose();
+  }
+
+  [Test]
+  public async Task SaturdayNoonTransitOf42KmCosts7100()
+  {
+    var when = new LocalDateTime(2019, 1, 12, 12, 0).InZoneStrictly(Warsaw).ToInstant();
+    var (from, to) = _app.Fixtures.AddressesOf42KmDistance();
+    var transit = await _app.Fixtures.ADraftTransitAt(when, from, to);
+
+    var quoted = await _app.Api.FindTransit(transit);
+
+    ((int)quoted.EstimatedPrice).Should().Be(7100);
   }
 
   [Test]
