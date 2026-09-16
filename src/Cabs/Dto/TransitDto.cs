@@ -1,4 +1,5 @@
 using System.Globalization;
+using LegacyFighter.Cabs.DistanceValue;
 using LegacyFighter.Cabs.Entity;
 using NodaTime;
 
@@ -10,7 +11,7 @@ public class TransitDto
 
   public int? Factor;
 
-  private float _distance;
+  private Distance _distance;
 
   private string _distanceUnit;
 
@@ -26,11 +27,11 @@ public class TransitDto
   public TransitDto(Transit transit)
   {
     Id = transit.Id;
-    _distance = transit.Km;
+    _distance = transit.KmDistance;
     Factor = transit.Factor;
     if (transit.Price != null)
     {
-      Price = new decimal(transit.Price.Value);
+      Price = new decimal(transit.Price.IntValue);
     }
 
     _date = transit.DateTime;
@@ -46,12 +47,12 @@ public class TransitDto
     ClientDto = new ClientDto(transit.Client);
     if (transit.DriversFee != null)
     {
-      DriverFee = new decimal(transit.DriversFee.Value);
+      DriverFee = new decimal(transit.DriversFee.IntValue);
     }
 
     if (transit.EstimatedPrice != null)
     {
-      EstimatedPrice = new decimal(transit.EstimatedPrice.Value);
+      EstimatedPrice = new decimal(transit.EstimatedPrice.IntValue);
     }
 
     DateTime = transit.DateTime;
@@ -144,36 +145,8 @@ public class TransitDto
 
   public string GetDistance(string unit)
   {
-    var usCulture = CultureInfo.CreateSpecificCulture("en-US");
     _distanceUnit = unit;
-    if (unit == "km")
-    {
-      if (_distance == Math.Ceiling(_distance))
-      {
-        return Math.Round(_distance).ToString(usCulture) + "km";
-
-      }
-
-      return _distance.ToString("0.000", usCulture) + "km";
-    }
-
-    if (unit == "miles")
-    {
-      var distance = _distance / 1.609344f;
-      if (distance == Math.Ceiling(distance))
-      {
-        return Math.Round(distance).ToString(usCulture) + "miles";
-      }
-
-      return distance.ToString("0.000", usCulture) + "miles";
-    }
-
-    if (unit == "m")
-    {
-      return Math.Round(_distance*1000).ToString(usCulture) + "m";
-    }
-
-    throw new ArgumentException("Invalid unit " + unit);
+    return _distance.PrintIn(unit);
   }
 
   public List<DriverDto> ProposedDrivers { get; set; } = new();

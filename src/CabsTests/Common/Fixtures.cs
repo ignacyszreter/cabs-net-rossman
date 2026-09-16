@@ -1,79 +1,64 @@
-using System;
-using System.Threading.Tasks;
-using LegacyFighter.Cabs.Dto;
 using LegacyFighter.Cabs.Entity;
+using LegacyFighter.Cabs.MoneyValue;
 using LegacyFighter.Cabs.Repository;
-using Microsoft.Extensions.DependencyInjection;
+using LegacyFighter.Cabs.Service;
 using NodaTime;
-using NodaTime.Testing;
+using NodaTime.Extensions;
 
 namespace LegacyFighter.CabsTests.Common;
 
-internal class Fixtures
+public partial class Fixtures
 {
-  private readonly CabsApi _api;
-  private readonly FakeClock _clock;
-  private readonly IServiceProvider _services;
+  private readonly ITransitRepository _transitRepository;
+  private readonly IDriverFeeRepository _feeRepository;
+  private readonly IDriverService _driverService;
 
-  public Fixtures(CabsApi api, FakeClock clock, IServiceProvider services)
+  public Fixtures(
+    ITransitRepository transitRepository,
+    IDriverFeeRepository feeRepository,
+    IDriverService driverService)
   {
-    _api = api;
-    _clock = clock;
-    _services = services;
+    _transitRepository = transitRepository;
+    _feeRepository = feeRepository;
+    _driverService = driverService;
   }
 
-  public AddressDto AnAddress(string street, int buildingNumber)
+  public Task<Transit> ATransit(Driver driver, int price, LocalDateTime when)
   {
-    return new AddressDto("Polska", "Warszawa", street, buildingNumber);
-  }
-
-  public (AddressDto From, AddressDto To) AddressesOf42KmDistance()
-  {
-    return (AnAddress("Młynarska", 20), AnAddress("Żytnia", 25));
-  }
-
-  public Task<long> AClient()
-  {
-    return _api.RegisterClient("Janusz", "Kowalski");
-  }
-
-  public async Task<long> ADriverNearby(string plateNumber)
-  {
-    var driver = await _api.RegisterDriver("FARME100165AB5EW", "Janusz", "Kowalski");
-    await _api.ActivateDriver(driver);
-    await _api.LogInDriver(driver, plateNumber, CarType.CarClasses.Van, "BRAND");
-    await _api.RegisterDriverPosition(driver, 1, 1);
-    return driver;
-  }
-
-  public async Task DriverHasFlatFee(long driverId, int amount)
-  {
-    using var scope = _services.CreateScope();
-    var driver = await scope.ServiceProvider.GetRequiredService<IDriverRepository>().Find(driverId);
-    await scope.ServiceProvider.GetRequiredService<IDriverFeeRepository>()
-      .Save(new DriverFee(DriverFee.FeeTypes.Flat, driver, amount, 0));
-  }
-
-  public async Task AnActiveCarCategory(CarType.CarClasses carClass)
-  {
-    var (carType, minNoOfCars) = await _api.RegisterCarType(carClass, "opis");
-    for (var car = 0; car < minNoOfCars; car++)
+    var transit = new Transit
     {
-      await _api.RegisterCar(carClass);
-    }
-
-    await _api.ActivateCarType(carType);
+      Price = new Money(price),
+      Driver = driver,
+      DateTime = when.InUtc().ToInstant()
+    };
+    return _transitRepository.Save(transit);
   }
 
-  public async Task<long> ADraftTransitNow(AddressDto from, AddressDto to)
+  public Task<Transit> ATransit(Driver driver, int price)
   {
-    var transit = await _api.OrderTransit(await AClient(), from, to);
-    return transit.Id!.Value;
+    return ATransit(driver, price, SystemClock.Instance.InBclSystemDefaultZone().GetCurrentLocalDateTime());
   }
 
-  public async Task<long> ADraftTransitAt(Instant when, AddressDto from, AddressDto to)
+  public Task<DriverFee> DriverHasFee(Driver driver, DriverFee.FeeTypes feeType, int amount, int min)
   {
-    _clock.Reset(when);
-    return await ADraftTransitNow(from, to);
+    var driverFee = new DriverFee
+    {
+      Driver = driver,
+      Amount = amount,
+      FeeType = feeType,
+      Min = new Money(min)
+    };
+    return _feeRepository.Save(driverFee);
+  }
+
+  public Task<DriverFee> DriverHasFee(Driver driver, DriverFee.FeeTypes feeType, int amount)
+  {
+    return DriverHasFee(driver, feeType, amount, 0);
+  }
+
+  public Task<Driver> ADriver()
+  {
+    return _driverService.CreateDriver("FARME100165AB5EW", "Kowalsi", "Janusz", Driver.Types.Regular,
+      Driver.Statuses.Active, "");
   }
 }

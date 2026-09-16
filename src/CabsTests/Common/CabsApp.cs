@@ -15,7 +15,6 @@ internal class CabsApp : WebApplicationFactory<Program>
   private readonly FakeClock _clock = new(SystemClock.Instance.GetCurrentInstant());
   private IServiceScope _scope;
   private CabsApi? _api;
-  private Fixtures? _fixtures;
 
   private CabsApp(Action<IServiceCollection> customization)
   {
@@ -39,6 +38,7 @@ internal class CabsApp : WebApplicationFactory<Program>
     {
       collection.RemoveAll<IClock>();
       collection.AddSingleton<IClock>(_clock);
+      collection.AddTransient<Fixtures>();
     });
     builder.ConfigureServices(_customization);
   }
@@ -61,6 +61,9 @@ internal class CabsApp : WebApplicationFactory<Program>
   public IClientService ClientService
     => NewRequestScope().ServiceProvider.GetRequiredService<IClientService>();
 
+  public IDriverFeeService DriverFeeService
+    => NewRequestScope().ServiceProvider.GetRequiredService<IDriverFeeService>();
+
   public IDriverService DriverService
     => NewRequestScope().ServiceProvider.GetRequiredService<IDriverService>();
 
@@ -78,5 +81,6 @@ internal class CabsApp : WebApplicationFactory<Program>
 
   public CabsApi Api => _api ??= new CabsApi(this);
 
-  public Fixtures Fixtures => _fixtures ??= new Fixtures(Api, _clock, Services);
+  public Fixtures Fixtures
+    => NewRequestScope().ServiceProvider.GetRequiredService<Fixtures>().WithApi(Api, _clock, Services);
 }
