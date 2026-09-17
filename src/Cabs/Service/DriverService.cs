@@ -1,9 +1,8 @@
-using System.Data;
+using LegacyFighter.Cabs.DriverPayments;
 using LegacyFighter.Cabs.Dto;
 using LegacyFighter.Cabs.Entity;
 using LegacyFighter.Cabs.MoneyValue;
 using LegacyFighter.Cabs.Repository;
-using Microsoft.EntityFrameworkCore;
 
 namespace LegacyFighter.Cabs.Service;
 
@@ -13,16 +12,16 @@ public class DriverService : IDriverService
 
   private readonly IDriverRepository _driverRepository;
   private readonly IDriverAttributeRepository _driverAttributeRepository;
-  private readonly SqLiteDbContext _dbContext;
+  private readonly IDriverPaymentsCalculator _paymentsCalculator;
 
   public DriverService(
     IDriverRepository driverRepository,
     IDriverAttributeRepository driverAttributeRepository,
-    SqLiteDbContext dbContext)
+    IDriverPaymentsCalculator paymentsCalculator)
   {
     _driverRepository = driverRepository;
     _driverAttributeRepository = driverAttributeRepository;
-    _dbContext = dbContext;
+    _paymentsCalculator = paymentsCalculator;
   }
 
   public async Task<Driver> CreateDriver(string license, string lastName, string firstName, Driver.Types type,
@@ -130,42 +129,7 @@ public class DriverService : IDriverService
 
   public async Task<Dictionary<Month, Money>> CalculateDriverYearlyPayment(long? driverId, int year)
   {
-    var driver = await _driverRepository.Find(driverId);
-    if (driver == null)
-    {
-      throw new ArgumentException("Driver does not exists, id = " + driverId);
-    }
-
-    var payments = Month.Values().ToDictionary(m => m, _ => Money.Zero);
-    var connection = _dbContext.Database.GetDbConnection();
-    var wasClosed = connection.State == ConnectionState.Closed;
-    if (wasClosed)
-    {
-      await connection.OpenAsync();
-    }
-
-    try
-    {
-      await using var command = _dbContext.Database.CreateCommand();
-      command.CommandText = "dbo.CalculateDriverMonthlyPayments";
-      command.CommandType = CommandType.StoredProcedure;
-      command.AddParameter("@DriverId", driverId);
-      command.AddParameter("@Year", year);
-      await using var reader = await command.ExecuteReaderAsync();
-      while (await reader.ReadAsync())
-      {
-        payments[new Month(reader.GetInt32(0))] = new Money(reader.GetInt32(1));
-      }
-    }
-    finally
-    {
-      if (wasClosed)
-      {
-        await connection.CloseAsync();
-      }
-    }
-
-    return payments;
+    return await _paymentsCalculator.YearlyPayments(driverId, year);
   }
 
   public async Task<DriverDto> LoadDriver(long? driverId)

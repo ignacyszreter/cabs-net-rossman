@@ -1,5 +1,6 @@
 using LegacyFighter.Cabs.Common;
 using LegacyFighter.Cabs.Config;
+using LegacyFighter.Cabs.DriverPayments;
 using LegacyFighter.Cabs.DriverSettlements;
 using LegacyFighter.Cabs.Repository;
 using LegacyFighter.Cabs.Service;
@@ -51,6 +52,7 @@ builder.Services.AddTransient<IClientService>(
   ctx => new TransactionalClientService(
     ctx.GetRequiredService<ClientService>(), 
     ctx.GetRequiredService<ITransactions>()));
+builder.Services.AddTransient<IDriverPaymentsCalculator, StoredProcedureDriverPaymentsCalculator>();
 builder.Services.AddTransient<DriverService>();
 builder.Services.AddTransient<IDriverService>(ctx =>
   new TransactionalDriverService(
