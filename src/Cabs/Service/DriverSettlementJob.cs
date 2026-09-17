@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Net.Mail;
 using System.Text;
-using LegacyFighter.Cabs.Controllers;
+using LegacyFighter.Cabs.DriverSettlements;
 using LegacyFighter.Cabs.Entity;
 using LegacyFighter.Cabs.Repository;
 
@@ -41,7 +41,7 @@ public class DriverSettlementJob : BackgroundService
     var year = DateTime.Now.Year - 1;
     using var scope = _serviceProvider.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<SqLiteDbContext>();
-    var driverSettlement = scope.ServiceProvider.GetRequiredService<DriverSettlementController>();
+    var driverSettlement = scope.ServiceProvider.GetRequiredService<IDriverSettlement>();
     var pl = new CultureInfo("pl-PL");
 
     var drivers = dbContext.Drivers.Where(d => d.Status == Driver.Statuses.Active).ToList();

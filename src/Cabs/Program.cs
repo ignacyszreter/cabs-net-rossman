@@ -1,5 +1,6 @@
 using LegacyFighter.Cabs.Common;
 using LegacyFighter.Cabs.Config;
+using LegacyFighter.Cabs.DriverSettlements;
 using LegacyFighter.Cabs.Repository;
 using LegacyFighter.Cabs.Service;
 using NodaTime;
@@ -97,6 +98,7 @@ builder.Services.AddHttpClient("Nbp", client =>
   client.BaseAddress = new Uri(builder.Configuration["Nbp:BaseUrl"]!));
 builder.Services.AddHttpClient("PublicHolidays", client =>
   client.BaseAddress = new Uri(builder.Configuration["PublicHolidays:BaseUrl"]!));
+builder.Services.AddTransient<IDriverSettlement, DriverSettlementService>();
 builder.Services.AddControllers().AddControllersAsServices();
 
 var app = builder.Build();
