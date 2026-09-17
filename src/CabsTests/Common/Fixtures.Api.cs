@@ -47,6 +47,14 @@ public partial class Fixtures
     return driver;
   }
 
+  public async Task<long> ADriverOnDuty(string plateNumber)
+  {
+    await ARegisteredActiveCarCategory(CarType.CarClasses.Van);
+    var driver = await ADriverNearby(plateNumber);
+    await DriverHasFlatFee(driver, 10);
+    return driver;
+  }
+
   public async Task DriverHasFlatFee(long driverId, int amount)
   {
     using var scope = _services.CreateScope();
@@ -76,5 +84,17 @@ public partial class Fixtures
   {
     _clock.Reset(when);
     return await ADraftTransitNow(from, to);
+  }
+
+  public async Task<long> ACompletedTransitFor(long clientId, long driverId, Instant when)
+  {
+    _clock.Reset(when);
+    var (from, to) = AddressesOf42KmDistance();
+    var ordered = await _api.OrderTransit(clientId, from, to);
+    await _api.PublishTransit(ordered.Id);
+    await _api.AcceptTransit(ordered.Id, driverId);
+    await _api.StartTransit(ordered.Id, driverId);
+    await _api.CompleteTransit(ordered.Id, driverId, to);
+    return ordered.Id!.Value;
   }
 }
