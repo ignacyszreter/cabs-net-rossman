@@ -134,6 +134,9 @@ internal class CabsApp : WebApplicationFactory<Program>
   public IDriverService DriverService
     => RequestScope().ServiceProvider.GetRequiredService<IDriverService>();
 
+  public DriverSettlementController DriverSettlementController
+    => RequestScope().ServiceProvider.GetRequiredService<DriverSettlementController>();
+
   public ITransitService TransitService
     => RequestScope().ServiceProvider.GetRequiredService<ITransitService>();
 
