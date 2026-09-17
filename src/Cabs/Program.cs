@@ -92,6 +92,11 @@ builder.Services.AddTransient<ClaimNumberGenerator>();
 builder.Services.AddSingleton<IAppProperties, AppProperties>();
 builder.Services.AddSingleton<IClock>(_ => SystemClock.Instance);
 builder.Services.AddTransient<AddressRepository>();
+builder.Services.AddHostedService<DriverSettlementJob>();
+builder.Services.AddHttpClient("Nbp", client =>
+  client.BaseAddress = new Uri(builder.Configuration["Nbp:BaseUrl"]!));
+builder.Services.AddHttpClient("PublicHolidays", client =>
+  client.BaseAddress = new Uri(builder.Configuration["PublicHolidays:BaseUrl"]!));
 builder.Services.AddControllers().AddControllersAsServices();
 
 var app = builder.Build();
