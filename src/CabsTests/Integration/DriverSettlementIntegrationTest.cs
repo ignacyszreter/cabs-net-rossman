@@ -23,6 +23,30 @@ public class DriverSettlementIntegrationTest
     await _app.DisposeAsync();
   }
 
+  [Test]
+  public async Task SettlesTwoYears()
+  {
+    var driverId = await ADriverWithTransits(2024, 2025);
+
+    var settlements = new
+    {
+      In2024 = await _app.DriverSettlementController.Settle(driverId, 2024),
+      In2025 = await _app.DriverSettlementController.Settle(driverId, 2025)
+    };
+
+    await VerifySettlement(settlements);
+  }
+
+  [Test]
+  public async Task SettlesYearWithoutTransits()
+  {
+    var driverId = await ADriverWithTransits();
+
+    var settlement = await _app.DriverSettlementController.Settle(driverId, 2025);
+
+    await VerifySettlement(settlement);
+  }
+
   private async Task<long> ADriverWithTransits(params int[] years)
   {
     _app.StartReuseRequestScope();
