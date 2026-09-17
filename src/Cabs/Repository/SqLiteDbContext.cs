@@ -196,6 +196,7 @@ public class SqLiteDbContext : DbContext
     modelBuilder.Entity<TaxConfig>(builder =>
     {
       builder.HasKey(c => c.Id);
+      builder.Property("Version").IsConcurrencyToken();
       builder.Property(c => c.LastModifiedDate).HasConversion(instantConverter);
       builder.Property(c => c.Country).HasConversion(c => c.AsString(), name => new Country(name));
       builder.Ignore(c => c.CurrentRulesCount);

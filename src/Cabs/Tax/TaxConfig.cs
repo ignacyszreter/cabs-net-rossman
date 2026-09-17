@@ -25,6 +25,7 @@ public class TaxConfig
   public Instant? LastModifiedDate { get; private set; }
   public string ModifiedBy { get; private set; }
   public int MaxRulesCount { get; private set; }
+  private int Version { get; set; }
   public virtual IReadOnlyCollection<TaxRule> TaxRules => _taxRules.AsReadOnly();
   public int CurrentRulesCount => _taxRules.Count;
 
@@ -37,6 +38,7 @@ public class TaxConfig
 
     _taxRules.Add(taxRule);
     LastModifiedDate = when;
+    Version++;
   }
 
   public void Remove(TaxRule taxRule, Instant when)
@@ -50,6 +52,7 @@ public class TaxConfig
 
       _taxRules.Remove(taxRule);
       LastModifiedDate = when;
+      Version++;
     }
   }
 
