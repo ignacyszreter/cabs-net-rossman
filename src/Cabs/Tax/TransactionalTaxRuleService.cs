@@ -53,7 +53,7 @@ public class TransactionalTaxRuleService : ITaxRuleService
     await tx.Commit();
   }
 
-  public async Task<List<TaxRule>> FindRules(string country)
+  public async Task<IReadOnlyCollection<TaxRule>> FindRules(string country)
   {
     await using var tx = await _transactions.BeginTransaction();
     var taxRules = await _inner.FindRules(country);

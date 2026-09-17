@@ -198,12 +198,13 @@ public class SqLiteDbContext : DbContext
       builder.HasKey(c => c.Id);
       builder.Property(c => c.LastModifiedDate).HasConversion(instantConverter);
       builder.Property(c => c.Country).HasConversion(c => c.AsString(), name => new Country(name));
-      builder.HasMany(c => c.TaxRules).WithOne(r => r.TaxConfig);
+      builder.Ignore(c => c.CurrentRulesCount);
+      builder.HasMany(c => c.TaxRules).WithOne(r => r.TaxConfig).IsRequired();
+      builder.Navigation(c => c.TaxRules).HasField("_taxRules");
     });
     modelBuilder.Entity<TaxRule>(builder =>
     {
       builder.HasKey(r => r.Id);
-      builder.HasOne(r => r.TaxConfig).WithMany(c => c.TaxRules);
     });
     modelBuilder.Entity<Transit>(builder =>
     {

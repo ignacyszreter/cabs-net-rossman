@@ -21,84 +21,7 @@ public class TaxRuleService : ITaxRuleService
 
   public async Task AddTaxRuleToCountry(string country, int aFactor, int bFactor, string taxCode)
   {
-    if (aFactor == 0)
-    {
-      throw new InvalidOperationException("Invalid aFactor");
-    }
-
-    var taxRule = new TaxRule
-    {
-      AFactor = aFactor,
-      BFactor = bFactor,
-      IsLinear = true,
-      TaxCode = "Dz.U. " + _clock.GetCurrentInstant().InUtc().Year + " " + taxCode
-    };
-
-    var taxConfig = await _taxConfigRepository.FindByCountry(Country.Of(country));
-    if (taxConfig == null)
-    {
-      taxConfig = await CreateTaxConfigWithRule(country, taxRule);
-      return;
-    }
-
-    if (taxConfig.MaxRulesCount <= taxConfig.TaxRules.Count)
-    {
-      throw new InvalidOperationException("Too many rules");
-    }
-
-    taxConfig.TaxRules.Add(taxRule);
-    taxConfig.CurrentRulesCount += 1;
-    taxConfig.LastModifiedDate = _clock.GetCurrentInstant();
-  }
-
-  public async Task<TaxConfig> CreateTaxConfigWithRule(string country, TaxRule taxRule)
-  {
-    var taxConfig = new TaxConfig
-    {
-      Country = Country.Of(country),
-      TaxRules = new List<TaxRule>()
-    };
-
-    taxConfig.TaxRules.Add(taxRule);
-    taxConfig.CurrentRulesCount = taxConfig.TaxRules.Count;
-    taxConfig.MaxRulesCount = 10;
-    taxConfig.LastModifiedDate = _clock.GetCurrentInstant();
-
-    return await _taxConfigRepository.Save(taxConfig);
-  }
-
-  public async Task<TaxConfig> CreateTaxConfigWithRule(string country, int maxRulesCount, TaxRule taxRule)
-  {
-    var taxConfig = new TaxConfig
-    {
-      Country = Country.Of(country),
-      TaxRules = new List<TaxRule>()
-    };
-
-    taxConfig.TaxRules.Add(taxRule);
-    taxConfig.CurrentRulesCount = taxConfig.TaxRules.Count;
-    taxConfig.MaxRulesCount = maxRulesCount;
-    taxConfig.LastModifiedDate = _clock.GetCurrentInstant();
-
-    return await _taxConfigRepository.Save(taxConfig);
-  }
-
-  public async Task AddTaxRuleToCountry(string country, int aFactor, int bFactor, int cFactor, string taxCode)
-  {
-    if (aFactor == 0)
-    {
-      throw new InvalidOperationException("Invalid aFactor");
-    }
-
-    var taxRule = new TaxRule
-    {
-      ASquareFactor = aFactor,
-      BSquareFactor = bFactor,
-      CSquareFactor = cFactor,
-      IsSquare = true,
-      TaxCode = "Dz.U. " + _clock.GetCurrentInstant().InUtc().Year + " " + taxCode
-    };
-
+    var taxRule = TaxRule.LinearRule(aFactor, bFactor, TaxCodeOf(taxCode));
     var taxConfig = await _taxConfigRepository.FindByCountry(Country.Of(country));
     if (taxConfig == null)
     {
@@ -106,35 +29,41 @@ public class TaxRuleService : ITaxRuleService
       return;
     }
 
-    if (taxConfig.MaxRulesCount <= taxConfig.TaxRules.Count)
+    taxConfig.Add(taxRule, _clock.GetCurrentInstant());
+  }
+
+  public async Task<TaxConfig> CreateTaxConfigWithRule(string country, TaxRule taxRule)
+  {
+    return await CreateTaxConfigWithRule(country, 10, taxRule);
+  }
+
+  public async Task<TaxConfig> CreateTaxConfigWithRule(string country, int maxRulesCount, TaxRule taxRule)
+  {
+    var taxConfig = new TaxConfig(country, maxRulesCount, taxRule, _clock.GetCurrentInstant());
+    return await _taxConfigRepository.Save(taxConfig);
+  }
+
+  public async Task AddTaxRuleToCountry(string country, int aFactor, int bFactor, int cFactor, string taxCode)
+  {
+    var taxRule = TaxRule.SquareRule(aFactor, bFactor, cFactor, TaxCodeOf(taxCode));
+    var taxConfig = await _taxConfigRepository.FindByCountry(Country.Of(country));
+    if (taxConfig == null)
     {
-      throw new InvalidOperationException("Too many rules");
+      await CreateTaxConfigWithRule(country, taxRule);
+      return;
     }
 
-    taxConfig.TaxRules.Add(taxRule);
-    taxConfig.CurrentRulesCount += 1;
-    taxConfig.LastModifiedDate = _clock.GetCurrentInstant();
+    taxConfig.Add(taxRule, _clock.GetCurrentInstant());
   }
 
   public async Task DeleteRule(long? taxRuleId, long? configId)
   {
     var taxRule = await _taxRuleRepository.Find(taxRuleId);
     var taxConfig = await _taxConfigRepository.Find(configId);
-    if (taxConfig.TaxRules.Contains(taxRule))
-    {
-      if (taxConfig.TaxRules.Count == 1)
-      {
-        throw new InvalidOperationException("Last rule in country config");
-      }
-
-      await _taxRuleRepository.Delete(taxRule);
-      taxConfig.TaxRules.Remove(taxRule);
-      taxConfig.CurrentRulesCount -= 1;
-      taxConfig.LastModifiedDate = _clock.GetCurrentInstant();
-    }
+    taxConfig.Remove(taxRule, _clock.GetCurrentInstant());
   }
 
-  public async Task<List<TaxRule>> FindRules(string country)
+  public async Task<IReadOnlyCollection<TaxRule>> FindRules(string country)
   {
     return (await _taxConfigRepository.FindByCountry(Country.Of(country))).TaxRules;
   }
@@ -169,5 +98,10 @@ public class TaxRuleService : ITaxRuleService
     }
 
     return new Money(tax);
+  }
+
+  private string TaxCodeOf(string taxCode)
+  {
+    return "Dz.U. " + _clock.GetCurrentInstant().InUtc().Year + " " + taxCode;
   }
 }

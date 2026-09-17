@@ -9,7 +9,7 @@ public interface ITaxRuleService
   Task<TaxConfig> CreateTaxConfigWithRule(string country, TaxRule taxRule);
   Task<TaxConfig> CreateTaxConfigWithRule(string country, int maxRulesCount, TaxRule taxRule);
   Task DeleteRule(long? taxRuleId, long? configId);
-  Task<List<TaxRule>> FindRules(string country);
+  Task<IReadOnlyCollection<TaxRule>> FindRules(string country);
   Task<int> RulesCount(string country);
   Task<List<TaxConfig>> FindAllConfigs();
   Task<Money> CalculateTax(string country, Money price);

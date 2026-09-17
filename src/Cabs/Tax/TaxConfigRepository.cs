@@ -23,12 +23,12 @@ internal class EfCoreTaxConfigRepository : ITaxConfigRepository
 
   public async Task<TaxConfig> Find(long? id)
   {
-    return await _context.TaxConfigs.FindAsync(id);
+    return await _context.TaxConfigs.Include(c => c.TaxRules).FirstOrDefaultAsync(c => c.Id == id);
   }
 
   public async Task<TaxConfig> FindByCountry(Country country)
   {
-    return await _context.TaxConfigs.FirstOrDefaultAsync(c => c.Country == country);
+    return await _context.TaxConfigs.Include(c => c.TaxRules).FirstOrDefaultAsync(c => c.Country == country);
   }
 
   public async Task<List<TaxConfig>> FindAll()

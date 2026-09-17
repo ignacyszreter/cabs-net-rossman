@@ -22,11 +22,6 @@ public class TaxConfigController
     {
       if (!map.ContainsKey(taxConfig.Country.AsString()))
       {
-        if (taxConfig.TaxRules == null)
-        {
-          taxConfig.TaxRules = new List<TaxRule>();
-        }
-
         map.Add(taxConfig.Country.AsString(), taxConfig.TaxRules.Select(r => new TaxRuleDto(r)).ToList());
       }
       else
