@@ -2,6 +2,7 @@ using LegacyFighter.Cabs.Common;
 using LegacyFighter.Cabs.Config;
 using LegacyFighter.Cabs.Repository;
 using LegacyFighter.Cabs.Service;
+using LegacyFighter.Cabs.Tax;
 using NodaTime;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,8 @@ builder.Services.AddTransient<IInvoiceRepository, EfCoreInvoiceRepository>();
 builder.Services.AddTransient<IContractRepository, EfCoreContractRepository>();
 builder.Services.AddTransient<IContractAttachmentRepository, EfCoreContractAttachmentRepository>();
 builder.Services.AddTransient<ICarTypeRepository, EfCoreCarTypeRepository>();
+builder.Services.AddTransient<ITaxConfigRepository, EfCoreTaxConfigRepository>();
+builder.Services.AddTransient<ITaxRuleRepository, EfCoreTaxRuleRepository>();
 builder.Services.AddTransient<ClaimService>();
 builder.Services.AddTransient<IClaimService>(ctx => 
   new TransactionalClaimService(
@@ -83,6 +86,11 @@ builder.Services.AddTransient<TransitAnalyzer>();
 builder.Services.AddTransient<ITransitAnalyzer>(ctx =>
   new TransactionalTransitAnalyzer(
     ctx.GetRequiredService<TransitAnalyzer>(),
+    ctx.GetRequiredService<ITransactions>()));
+builder.Services.AddTransient<TaxRuleService>();
+builder.Services.AddTransient<ITaxRuleService>(ctx =>
+  new TransactionalTaxRuleService(
+    ctx.GetRequiredService<TaxRuleService>(),
     ctx.GetRequiredService<ITransactions>()));
 builder.Services.AddTransient<InvoiceGenerator>();
 builder.Services.AddTransient<DistanceCalculator>();

@@ -1,6 +1,7 @@
 using System.Data.Common;
 using LegacyFighter.Cabs.Common;
 using LegacyFighter.Cabs.Entity;
+using LegacyFighter.Cabs.Tax;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -27,6 +28,8 @@ public class SqLiteDbContext : DbContext
   public DbSet<DriverPosition> DriverPositions { get; set; }
   public DbSet<DriverSession> DriverSessions { get; set; }
   public DbSet<Invoice> Invoices { get; set; }
+  public DbSet<TaxConfig> TaxConfigs { get; set; }
+  public DbSet<TaxRule> TaxRules { get; set; }
   public DbSet<Transit> Transits { get; set; }
 
   public static DbConnection CreateInMemoryDatabase()
@@ -189,6 +192,18 @@ public class SqLiteDbContext : DbContext
     modelBuilder.Entity<Invoice>(builder =>
     {
       builder.MapBaseEntityProperties();
+    });
+    modelBuilder.Entity<TaxConfig>(builder =>
+    {
+      builder.HasKey(c => c.Id);
+      builder.Property(c => c.LastModifiedDate).HasConversion(instantConverter);
+      builder.Property(c => c.Country).HasConversion(c => c.AsString(), name => new Country(name));
+      builder.HasMany(c => c.TaxRules).WithOne(r => r.TaxConfig);
+    });
+    modelBuilder.Entity<TaxRule>(builder =>
+    {
+      builder.HasKey(r => r.Id);
+      builder.HasOne(r => r.TaxConfig).WithMany(c => c.TaxRules);
     });
     modelBuilder.Entity<Transit>(builder =>
     {
