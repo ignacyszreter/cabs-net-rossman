@@ -98,6 +98,8 @@ builder.Services.AddHttpClient("Nbp", client =>
   client.BaseAddress = new Uri(builder.Configuration["Nbp:BaseUrl"]!));
 builder.Services.AddHttpClient("PublicHolidays", client =>
   client.BaseAddress = new Uri(builder.Configuration["PublicHolidays:BaseUrl"]!));
+builder.Services.AddTransient<IExchangeRates, NbpExchangeRates>();
+builder.Services.AddTransient<IPublicHolidays, NagerPublicHolidays>();
 builder.Services.AddTransient<IDriverSettlement, DriverSettlementService>();
 builder.Services.AddControllers().AddControllersAsServices();
 

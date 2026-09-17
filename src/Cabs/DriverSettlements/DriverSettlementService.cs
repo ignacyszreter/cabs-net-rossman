@@ -1,6 +1,4 @@
 using System.Data;
-using System.Globalization;
-using System.Text.Json;
 using LegacyFighter.Cabs.Dto;
 using LegacyFighter.Cabs.MoneyValue;
 using LegacyFighter.Cabs.Repository;
@@ -13,16 +11,19 @@ public class DriverSettlementService : IDriverSettlement
 {
   private readonly IDriverRepository _driverRepository;
   private readonly SqLiteDbContext _dbContext;
-  private readonly IHttpClientFactory _httpClientFactory;
+  private readonly IExchangeRates _exchangeRates;
+  private readonly IPublicHolidays _publicHolidays;
 
   public DriverSettlementService(
     IDriverRepository driverRepository,
     SqLiteDbContext dbContext,
-    IHttpClientFactory httpClientFactory)
+    IExchangeRates exchangeRates,
+    IPublicHolidays publicHolidays)
   {
     _driverRepository = driverRepository;
     _dbContext = dbContext;
-    _httpClientFactory = httpClientFactory;
+    _exchangeRates = exchangeRates;
+    _publicHolidays = publicHolidays;
   }
 
   public async Task<DriverSettlementDto> Settle(long driverId, int year)
@@ -64,18 +65,10 @@ public class DriverSettlementService : IDriverSettlement
 
     var total = payments.Values.Aggregate(Money.Zero, (sum, payment) => sum + payment);
 
-    var nbp = _httpClientFactory.CreateClient("Nbp");
-    var ratesJson = await nbp.GetStringAsync($"exchangerates/rates/a/eur/{year}-12-20/{year}-12-31/?format=json");
-    using var rates = JsonDocument.Parse(ratesJson);
-    var eurRate = rates.RootElement.GetProperty("rates").EnumerateArray().Last().GetProperty("mid").GetDecimal();
+    var eurRate = await _exchangeRates.EurRateAtEndOf(year);
     var totalInEur = Math.Round(total.IntValue / eurRate, 2);
 
-    var nager = _httpClientFactory.CreateClient("PublicHolidays");
-    var holidaysJson = await nager.GetStringAsync($"PublicHolidays/{year + 1}/PL");
-    using var holidays = JsonDocument.Parse(holidaysJson);
-    var holidayDates = holidays.RootElement.EnumerateArray()
-      .Select(h => DateOnly.ParseExact(h.GetProperty("date").GetString()!, "yyyy-MM-dd", CultureInfo.InvariantCulture))
-      .ToHashSet();
+    var holidayDates = await _publicHolidays.In(year + 1);
     var payoutDate = new DateOnly(year + 1, 1, 10);
     while (payoutDate.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday || holidayDates.Contains(payoutDate))
     {
