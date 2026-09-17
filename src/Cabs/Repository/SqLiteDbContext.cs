@@ -1,8 +1,11 @@
+using System.Data.Common;
 using LegacyFighter.Cabs.Common;
 using LegacyFighter.Cabs.Entity;
 using LegacyFighter.Cabs.Entity.Miles;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 
@@ -248,6 +251,21 @@ public class SqLiteDbContext : DbContext
 
 public static class EfCoreExtensions
 {
+  public static DbCommand CreateCommand(this DatabaseFacade database)
+  {
+    var command = database.GetDbConnection().CreateCommand();
+    command.Transaction = database.CurrentTransaction?.GetDbTransaction();
+    return command;
+  }
+
+  public static void AddParameter(this DbCommand command, string name, object value)
+  {
+    var parameter = command.CreateParameter();
+    parameter.ParameterName = name;
+    parameter.Value = value ?? DBNull.Value;
+    command.Parameters.Add(parameter);
+  }
+
   public static void MapBaseEntityProperties<T>(this EntityTypeBuilder<T> builder) where T : BaseEntity
   {
     builder.HasKey(e => e.Id);

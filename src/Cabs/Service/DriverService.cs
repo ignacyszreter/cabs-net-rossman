@@ -1,8 +1,9 @@
+using System.Data;
 using LegacyFighter.Cabs.Dto;
 using LegacyFighter.Cabs.Entity;
 using LegacyFighter.Cabs.MoneyValue;
 using LegacyFighter.Cabs.Repository;
-using NodaTime;
+using Microsoft.EntityFrameworkCore;
 
 namespace LegacyFighter.Cabs.Service;
 
@@ -12,19 +13,16 @@ public class DriverService : IDriverService
 
   private readonly IDriverRepository _driverRepository;
   private readonly IDriverAttributeRepository _driverAttributeRepository;
-  private readonly ITransitRepository _transitRepository;
-  private readonly IDriverFeeService _driverFeeService;
+  private readonly SqLiteDbContext _dbContext;
 
   public DriverService(
     IDriverRepository driverRepository,
     IDriverAttributeRepository driverAttributeRepository,
-    ITransitRepository transitRepository,
-    IDriverFeeService driverFeeService)
+    SqLiteDbContext dbContext)
   {
     _driverRepository = driverRepository;
     _driverAttributeRepository = driverAttributeRepository;
-    _transitRepository = transitRepository;
-    _driverFeeService = driverFeeService;
+    _dbContext = dbContext;
   }
 
   public async Task<Driver> CreateDriver(string license, string lastName, string firstName, Driver.Types type,
@@ -126,37 +124,47 @@ public class DriverService : IDriverService
 
   public async Task<Money> CalculateDriverMonthlyPayment(long? driverId, int year, int month) 
   {
-    var driver = await _driverRepository.Find(driverId);
-    if (driver == null)
-      throw new ArgumentException("Driver does not exists, id = " + driverId);
-
-    var yearMonth = new YearMonth(year, month);
-    var from = yearMonth
-      .OnDayOfMonth(1).AtStartOfDayInZone(DateTimeZoneProviders.Bcl.GetSystemDefault())
-      
-      .ToInstant();
-    var to = yearMonth
-
-      .AtEndOfMonth().PlusDays(1).AtStartOfDayInZone(DateTimeZoneProviders.Bcl.GetSystemDefault()).ToInstant();
-
-    var transitsList = await _transitRepository.FindAllByDriverAndDateTimeBetween(driver, @from, to);
-
-    var sum = Money.Zero;
-    foreach (var transit in transitsList)
-    {
-      sum += await _driverFeeService.CalculateDriverFee(transit.Id);
-    }
-
-    return sum;
+    var payments = await CalculateDriverYearlyPayment(driverId, year);
+    return payments[new Month(month)];
   }
 
   public async Task<Dictionary<Month, Money>> CalculateDriverYearlyPayment(long? driverId, int year)
   {
-    var payments = new Dictionary<Month, Money>();
-    foreach (var m in Month.Values()) 
+    var driver = await _driverRepository.Find(driverId);
+    if (driver == null)
     {
-      payments[m] = await CalculateDriverMonthlyPayment(driverId, year, m.Value);
+      throw new ArgumentException("Driver does not exists, id = " + driverId);
     }
+
+    var payments = Month.Values().ToDictionary(m => m, _ => Money.Zero);
+    var connection = _dbContext.Database.GetDbConnection();
+    var wasClosed = connection.State == ConnectionState.Closed;
+    if (wasClosed)
+    {
+      await connection.OpenAsync();
+    }
+
+    try
+    {
+      await using var command = _dbContext.Database.CreateCommand();
+      command.CommandText = "dbo.CalculateDriverMonthlyPayments";
+      command.CommandType = CommandType.StoredProcedure;
+      command.AddParameter("@DriverId", driverId);
+      command.AddParameter("@Year", year);
+      await using var reader = await command.ExecuteReaderAsync();
+      while (await reader.ReadAsync())
+      {
+        payments[new Month(reader.GetInt32(0))] = new Money(reader.GetInt32(1));
+      }
+    }
+    finally
+    {
+      if (wasClosed)
+      {
+        await connection.CloseAsync();
+      }
+    }
+
     return payments;
   }
 

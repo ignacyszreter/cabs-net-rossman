@@ -99,7 +99,7 @@ var app = builder.Build();
 using (var serviceScope = app.Services.CreateScope())
 {
   var context = serviceScope.ServiceProvider.GetRequiredService<SqLiteDbContext>();
-  await context.Database.EnsureCreatedAsync();
+  await serviceScope.ServiceProvider.GetRequiredService<IDatabase>().Create(context.Database);
 }
 
 // Configure the HTTP request pipeline.
