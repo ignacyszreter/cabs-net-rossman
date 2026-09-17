@@ -29,7 +29,7 @@ internal class EfCoreContractAttachmentDataRepository : IContractAttachmentDataR
   {
     return await _context.Database
       .ExecuteSqlInterpolatedAsync(
-        $"delete FROM ContractAttachmentsData AS cad WHERE cad.contractAttachmentNo = (SELECT ca.contractAttachmentNo FROM ContractAttachments ca WHERE ca.id = {attachmentId})");
+        $"DELETE FROM ContractAttachmentsData WHERE contractAttachmentNo = (SELECT ca.contractAttachmentNo FROM ContractAttachments ca WHERE ca.id = {attachmentId})");
   }
 
   public async Task<ContractAttachmentData> Save(ContractAttachmentData contractAttachmentData)

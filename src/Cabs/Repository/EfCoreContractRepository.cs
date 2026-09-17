@@ -29,7 +29,7 @@ internal class EfCoreContractRepository : IContractRepository
   public async Task<Contract> FindByAttachmentId(long? attachmentId)
   {
     return await _context.Contracts.FromSqlInterpolated(
-      $"SELECT * FROM Contracts c JOIN ContractAttachments ca ON ca.ContractId = c.id WHERE ca.Id = {attachmentId}")
+      $"SELECT c.* FROM Contracts c JOIN ContractAttachments ca ON ca.ContractId = c.id WHERE ca.Id = {attachmentId}")
       .SingleOrDefaultAsync();
   }
 

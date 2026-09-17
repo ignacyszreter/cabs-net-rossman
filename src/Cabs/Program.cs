@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddSingleton(_ => SqLiteDbContext.CreateInMemoryDatabase());
+builder.Services.AddSingleton(ctx => Databases.From(ctx.GetRequiredService<IConfiguration>()));
 builder.Services.AddDbContext<SqLiteDbContext>();
 builder.Services.AddTransient<ITransactions, Transactions>();
 builder.Services.AddTransient<IAddressRepositoryInterface, EfCoreAddressRepository>();

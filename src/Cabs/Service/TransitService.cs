@@ -385,7 +385,7 @@ public class TransitService : ITransitService
 
   public async Task StartTransit(long? driverId, long? transitId)
   {
-    var driver = _driverRepository.Find(driverId);
+    var driver = await _driverRepository.Find(driverId);
 
     if (driver == null)
     {

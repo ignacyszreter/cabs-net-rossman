@@ -141,10 +141,11 @@ public class DriverService : IDriverService
 
     var transitsList = await _transitRepository.FindAllByDriverAndDateTimeBetween(driver, @from, to);
 
-    var sum = await transitsList
-      .Select(t => _driverFeeService.CalculateDriverFee(t.Id)).Aggregate(
-        Task.FromResult(Money.Zero), 
-        async (sumSoFar, next) => (await  sumSoFar) + (await next));
+    var sum = Money.Zero;
+    foreach (var transit in transitsList)
+    {
+      sum += await _driverFeeService.CalculateDriverFee(transit.Id);
+    }
 
     return sum;
   }

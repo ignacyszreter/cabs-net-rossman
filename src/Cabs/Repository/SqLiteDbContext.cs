@@ -1,8 +1,6 @@
-using System.Data.Common;
 using LegacyFighter.Cabs.Common;
 using LegacyFighter.Cabs.Entity;
 using LegacyFighter.Cabs.Entity.Miles;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -12,7 +10,7 @@ namespace LegacyFighter.Cabs.Repository;
 
 public class SqLiteDbContext : DbContext
 {
-  private readonly DbConnection _connection;
+  private readonly IDatabase _database;
   public DbSet<Address> Addresses { get; set; }
   public DbSet<AwardedMiles> AwardedMiles { get; set; }
   public DbSet<AwardsAccount> AwardsAccounts { get; set; }
@@ -33,21 +31,15 @@ public class SqLiteDbContext : DbContext
   public DbSet<Transit> Transits { get; set; }
   public DbSet<ClaimsResolver> ClaimsResolvers { get; set; }
 
-  public static DbConnection CreateInMemoryDatabase()
+  public SqLiteDbContext(IDatabase database)
   {
-    var connection = new SqliteConnection("Filename=:memory:");
-    connection.Open();
-    return connection;
-  }
-
-  public SqLiteDbContext(DbConnection connection)
-  {
-    _connection = connection;
+    _database = database;
   }
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
   {
-    optionsBuilder.UseLazyLoadingProxies().UseSqlite(_connection);
+    optionsBuilder.UseLazyLoadingProxies();
+    _database.ApplyTo(optionsBuilder);
     optionsBuilder
       .LogTo(Console.WriteLine)
       .EnableSensitiveDataLogging()
@@ -120,7 +112,7 @@ public class SqLiteDbContext : DbContext
       builder.MapBaseEntityProperties();
       builder.HasOne(a => a.Claim);
       builder.Property(x => x.CreationDate).HasConversion(instantConverter).IsRequired();
-      builder.Property(x => x.Data).HasColumnType("BLOB");
+      builder.Property(x => x.Data);
     });
     modelBuilder.Entity<Client>(builder =>
     {
@@ -153,7 +145,7 @@ public class SqLiteDbContext : DbContext
     modelBuilder.Entity<ContractAttachmentData>(builder =>
     {
       builder.MapBaseEntityProperties();
-      builder.Property(x => x.Data).HasColumnType("BLOB");
+      builder.Property(x => x.Data);
       builder.Property(x => x.ContractAttachmentNo).IsRequired();
       builder.Property(x => x.CreationDate).HasConversion(instantConverter).IsRequired();
     });
