@@ -6,6 +6,7 @@ using NodaTime;
 
 namespace LegacyFighter.CabsTests.Integration;
 
+[Category("SqlServer")]
 public class CalculateDriverPeriodicPaymentsIntegrationTest
 {
   private CabsApp _app = default!;
@@ -15,7 +16,7 @@ public class CalculateDriverPeriodicPaymentsIntegrationTest
   [SetUp]
   public void InitializeApp()
   {
-    _app = CabsApp.CreateInstance();
+    _app = CabsApp.CreateInstanceOnSqlServer(_ => { });
   }
 
   [TearDown]
