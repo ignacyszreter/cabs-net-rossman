@@ -51,6 +51,11 @@ internal class CabsApp : WebApplicationFactory<Program>
     base.Dispose(disposing);
   }
 
+  public IServiceScope NewConcurrentRequestScope()
+  {
+    return Services.CreateAsyncScope();
+  }
+
   private IServiceScope NewRequestScope()
   {
     _scope.Dispose();

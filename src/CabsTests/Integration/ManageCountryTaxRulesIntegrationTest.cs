@@ -4,6 +4,8 @@ using LegacyFighter.Cabs.Entity;
 using LegacyFighter.Cabs.MoneyValue;
 using LegacyFighter.Cabs.Tax;
 using LegacyFighter.CabsTests.Common;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LegacyFighter.CabsTests.Integration;
 
@@ -132,6 +134,58 @@ public class ManageCountryTaxRulesIntegrationTest
     Assert.AreEqual(new Money(1500), await TaxRuleService.CalculateTax("Polska", new Money(10000)));
   }
 
+  [Test]
+  public async Task ParallelDeleteKeepsAtLeastOneRule()
+  {
+    //given
+    var config = await CreateConfigWithInitialRule("Polska", 5, TaxRule.LinearRule(8, 0, "VAT-8"));
+    //and
+    await TaxRuleService.AddTaxRuleToCountry("Polska", 2, 400, "OPLATA-LOTNISKOWA");
+    //and
+    using var firstRequest = _app.NewConcurrentRequestScope();
+    using var secondRequest = _app.NewConcurrentRequestScope();
+    //and
+    var configOfFirstRequest = await ConfigIn(firstRequest, config.Id);
+    var configOfSecondRequest = await ConfigIn(secondRequest, config.Id);
+
+    //when
+    configOfFirstRequest.Remove(configOfFirstRequest.TaxRules.First(), _app.Clock.GetCurrentInstant());
+    configOfSecondRequest.Remove(configOfSecondRequest.TaxRules.Last(), _app.Clock.GetCurrentInstant());
+    //and
+    await SaveIn(firstRequest, configOfFirstRequest);
+
+    //then
+    await this.Awaiting(_ => SaveIn(secondRequest, configOfSecondRequest))
+      .Should().ThrowExactlyAsync<DbUpdateConcurrencyException>();
+    //and
+    Assert.AreEqual(1, await TaxRuleService.RulesCount("Polska"));
+  }
+
+  [Test]
+  public async Task ParallelAddRespectsMaximumNumberOfRules()
+  {
+    //given
+    var config = await CreateConfigWithInitialRule("Polska", 2, TaxRule.LinearRule(8, 0, "VAT-8"));
+    //and
+    using var firstRequest = _app.NewConcurrentRequestScope();
+    using var secondRequest = _app.NewConcurrentRequestScope();
+    //and
+    var configOfFirstRequest = await ConfigIn(firstRequest, config.Id);
+    var configOfSecondRequest = await ConfigIn(secondRequest, config.Id);
+
+    //when
+    configOfFirstRequest.Add(TaxRule.LinearRule(2, 400, "OPLATA-LOTNISKOWA"), _app.Clock.GetCurrentInstant());
+    configOfSecondRequest.Add(TaxRule.LinearRule(1, 300, "OPLATA-NOCNA"), _app.Clock.GetCurrentInstant());
+    //and
+    await SaveIn(firstRequest, configOfFirstRequest);
+
+    //then
+    await this.Awaiting(_ => SaveIn(secondRequest, configOfSecondRequest))
+      .Should().ThrowExactlyAsync<DbUpdateConcurrencyException>();
+    //and
+    Assert.AreEqual(2, await TaxRuleService.RulesCount("Polska"));
+  }
+
   private async Task<TaxConfig> CreateConfigWithInitialRule(string country, int maxRules, TaxRule rule)
   {
     return await TaxRuleService.CreateTaxConfigWithRule(country, maxRules, rule);
@@ -140,5 +194,15 @@ public class ManageCountryTaxRulesIntegrationTest
   private async Task<long?> RuleIdByTaxCode(string country, string taxCode)
   {
     return (await TaxRuleService.FindRules(country)).Single(r => r.TaxCode.EndsWith(taxCode)).Id;
+  }
+
+  private static async Task<TaxConfig> ConfigIn(IServiceScope request, long? configId)
+  {
+    return await request.ServiceProvider.GetRequiredService<ITaxConfigRepository>().Find(configId);
+  }
+
+  private static async Task SaveIn(IServiceScope request, TaxConfig taxConfig)
+  {
+    await request.ServiceProvider.GetRequiredService<ITaxConfigRepository>().Save(taxConfig);
   }
 }
