@@ -1,6 +1,7 @@
 using System;
 using LegacyFighter.Cabs.Controllers;
 using LegacyFighter.Cabs.Service;
+using LegacyFighter.Cabs.Tax;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -79,6 +80,9 @@ internal class CabsApp : WebApplicationFactory<Program>
 
   public ITransitService TransitService
     => NewRequestScope().ServiceProvider.GetRequiredService<ITransitService>();
+
+  public ITaxRuleService TaxRuleService
+    => NewRequestScope().ServiceProvider.GetRequiredService<ITaxRuleService>();
 
   public TransitController TransitController
     => NewRequestScope().ServiceProvider.GetRequiredService<TransitController>();
