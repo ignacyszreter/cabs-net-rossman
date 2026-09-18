@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using LegacyFighter.Cabs.Controllers;
+using LegacyFighter.Cabs.DriverSettlements;
 using LegacyFighter.Cabs.Repository;
 using LegacyFighter.Cabs.Service;
 using Microsoft.AspNetCore.Hosting;
@@ -134,8 +135,8 @@ internal class CabsApp : WebApplicationFactory<Program>
   public IDriverService DriverService
     => RequestScope().ServiceProvider.GetRequiredService<IDriverService>();
 
-  public DriverSettlementController DriverSettlementController
-    => RequestScope().ServiceProvider.GetRequiredService<DriverSettlementController>();
+  public IDriverSettlement DriverSettlement
+    => RequestScope().ServiceProvider.GetRequiredService<IDriverSettlement>();
 
   public ITransitService TransitService
     => RequestScope().ServiceProvider.GetRequiredService<ITransitService>();

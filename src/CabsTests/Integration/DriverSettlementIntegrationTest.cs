@@ -30,8 +30,8 @@ public class DriverSettlementIntegrationTest
 
     var settlements = new
     {
-      In2024 = await _app.DriverSettlementController.Settle(driverId, 2024),
-      In2025 = await _app.DriverSettlementController.Settle(driverId, 2025)
+      In2024 = await _app.DriverSettlement.Settle(driverId, 2024),
+      In2025 = await _app.DriverSettlement.Settle(driverId, 2025)
     };
 
     await VerifySettlement(settlements);
@@ -42,7 +42,7 @@ public class DriverSettlementIntegrationTest
   {
     var driverId = await ADriverWithTransits();
 
-    var settlement = await _app.DriverSettlementController.Settle(driverId, 2025);
+    var settlement = await _app.DriverSettlement.Settle(driverId, 2025);
 
     await VerifySettlement(settlement);
   }
