@@ -15,18 +15,52 @@ public class ClaimsCopy :
     _claims = claims;
   }
 
-  public ValueTask Handle(ClientTypeChanged notification, CancellationToken cancellationToken)
+  public async ValueTask Handle(ClientTypeChanged notification, CancellationToken cancellationToken)
   {
-    return ValueTask.CompletedTask;
+    var claimant = await Claimant(notification.ClientId);
+    claimant.IsVip = notification.IsVip;
+    await _claims.SaveChangesAsync(cancellationToken);
   }
 
-  public ValueTask Handle(TransitOrdered notification, CancellationToken cancellationToken)
+  public async ValueTask Handle(TransitOrdered notification, CancellationToken cancellationToken)
   {
-    return ValueTask.CompletedTask;
+    if (await _claims.ClaimedTransits.FindAsync([notification.TransitId], cancellationToken) != null)
+    {
+      return;
+    }
+
+    _claims.ClaimedTransits.Add(new ClaimedTransitRecord
+    {
+      TransitId = notification.TransitId,
+      ClaimantId = notification.ClientId
+    });
+    var claimant = await Claimant(notification.ClientId);
+    claimant.OrderedTransits++;
+    await _claims.SaveChangesAsync(cancellationToken);
   }
 
-  public ValueTask Handle(TransitCompleted notification, CancellationToken cancellationToken)
+  public async ValueTask Handle(TransitCompleted notification, CancellationToken cancellationToken)
   {
-    return ValueTask.CompletedTask;
+    var transit = await _claims.ClaimedTransits.FindAsync([notification.TransitId], cancellationToken);
+    if (transit == null)
+    {
+      return;
+    }
+
+    transit.DriverId = notification.DriverId;
+    transit.Fare = notification.Fare;
+    await _claims.SaveChangesAsync(cancellationToken);
+  }
+
+  private async Task<ClaimantRecord> Claimant(long clientId)
+  {
+    var claimant = await _claims.Claimants.FindAsync(clientId);
+    if (claimant == null)
+    {
+      claimant = new ClaimantRecord { ClientId = clientId };
+      _claims.Claimants.Add(claimant);
+    }
+
+    return claimant;
   }
 }

@@ -12,8 +12,24 @@ public class ClaimsProjection : INotificationHandler<ClaimRegistered>
     _claims = claims;
   }
 
-  public ValueTask Handle(ClaimRegistered notification, CancellationToken cancellationToken)
+  public async ValueTask Handle(ClaimRegistered notification, CancellationToken cancellationToken)
   {
-    return ValueTask.CompletedTask;
+    if (await _claims.Claims.FindAsync([notification.ClaimId], cancellationToken) != null)
+    {
+      return;
+    }
+
+    _claims.Claims.Add(new ClaimRecord
+    {
+      ClaimId = notification.ClaimId,
+      ClaimNo = notification.ClaimNo,
+      ClaimantId = notification.ClaimantId,
+      TransitId = notification.TransitId,
+      Status = notification.IsDraft ? ClaimStatus.Draft : ClaimStatus.New,
+      CreatedAt = notification.CreatedAt,
+      Reason = notification.Reason,
+      IncidentDescription = notification.IncidentDescription
+    });
+    await _claims.SaveChangesAsync(cancellationToken);
   }
 }
