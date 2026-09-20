@@ -1,4 +1,6 @@
 using LegacyFighter.Cabs.Claims.Acl;
+using LegacyFighter.Cabs.Claims.Storage;
+using LegacyFighter.Cabs.Claims.Sync;
 using LegacyFighter.Cabs.Common;
 using LegacyFighter.Cabs.Config;
 using LegacyFighter.Cabs.Repository;
@@ -92,6 +94,10 @@ builder.Services.AddSingleton<IAppProperties, AppProperties>();
 builder.Services.AddSingleton<IClock>(_ => SystemClock.Instance);
 builder.Services.AddTransient<AddressRepository>();
 builder.Services.AddTransient<LegacyCabs>();
+builder.Services.AddSingleton<ClaimsDatabase>();
+builder.Services.AddDbContext<ClaimsDbContext>();
+builder.Services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped);
+builder.Services.AddTransient<IClaimsEvents, MediatorClaimsEvents>();
 builder.Services.AddControllers().AddControllersAsServices();
 
 var app = builder.Build();
@@ -100,6 +106,8 @@ using (var serviceScope = app.Services.CreateScope())
 {
   var context = serviceScope.ServiceProvider.GetRequiredService<SqLiteDbContext>();
   await context.Database.EnsureCreatedAsync();
+  var claims = serviceScope.ServiceProvider.GetRequiredService<ClaimsDbContext>();
+  await claims.Database.EnsureCreatedAsync();
 }
 
 // Configure the HTTP request pipeline.
