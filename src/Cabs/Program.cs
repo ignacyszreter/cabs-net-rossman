@@ -100,6 +100,7 @@ builder.Services.AddDbContext<ClaimsDbContext>();
 builder.Services.AddTransient<ClaimsFacade>();
 builder.Services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped);
 builder.Services.AddTransient<IClaimsEvents, MediatorClaimsEvents>();
+builder.Services.AddTransient<ClaimsMigration>();
 builder.Services.AddControllers().AddControllersAsServices();
 
 var app = builder.Build();

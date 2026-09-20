@@ -1,9 +1,11 @@
+using LegacyFighter.Cabs.Claims.Storage;
 using LegacyFighter.Cabs.Claims.Sync;
 using LegacyFighter.Cabs.Config;
 using LegacyFighter.Cabs.Dto;
 using LegacyFighter.Cabs.Entity;
 using LegacyFighter.Cabs.Repository;
 using LegacyFighter.Cabs.Service;
+using Microsoft.EntityFrameworkCore;
 using NodaTime;
 
 namespace LegacyFighter.Cabs.Claims.Acl;
@@ -20,6 +22,7 @@ public class LegacyCabs
   private readonly IDriverNotificationService _driverNotifications;
   private readonly IClock _clock;
   private readonly IClaimsEvents _events;
+  private readonly SqLiteDbContext _context;
 
   public LegacyCabs(
     IClaimRepository claims,
@@ -31,7 +34,8 @@ public class LegacyCabs
     IClientNotificationService clientNotifications,
     IDriverNotificationService driverNotifications,
     IClock clock,
-    IClaimsEvents events)
+    IClaimsEvents events,
+    SqLiteDbContext context)
   {
     _claims = claims;
     _clients = clients;
@@ -43,6 +47,7 @@ public class LegacyCabs
     _driverNotifications = driverNotifications;
     _clock = clock;
     _events = events;
+    _context = context;
   }
 
   public ClaimPolicy Policy()
@@ -112,6 +117,75 @@ public class LegacyCabs
   public async Task<ClaimDto> View(long claimId)
   {
     return new ClaimDto(await Find(claimId));
+  }
+
+  public async Task<List<ClaimantRecord>> AllClaimants()
+  {
+    return await _context.Clients
+      .Select(client => new ClaimantRecord
+      {
+        ClientId = client.Id!.Value,
+        IsVip = client.Type == Client.Types.Vip,
+        OrderedTransits = _context.Transits.Count(transit => transit.Client == client)
+      })
+      .ToListAsync();
+  }
+
+  public async Task<List<ClaimedTransitRecord>> AllClaimedTransits()
+  {
+    return await _context.Transits
+      .Select(transit => new ClaimedTransitRecord
+      {
+        TransitId = transit.Id!.Value,
+        ClaimantId = transit.Client.Id!.Value,
+        DriverId = transit.Driver == null ? null : transit.Driver.Id,
+        Fare = transit.Price == null ? null : transit.Price.IntValue
+      })
+      .ToListAsync();
+  }
+
+  public async Task<List<long>> AllClaimIds()
+  {
+    return await _context.Claims.Select(claim => claim.Id!.Value).ToListAsync();
+  }
+
+  public async Task<ClaimRecord> ReadClaim(long claimId)
+  {
+    return RecordOf(await Find(claimId));
+  }
+
+  private static ClaimRecord RecordOf(Claim claim)
+  {
+    return new ClaimRecord
+    {
+      ClaimId = claim.Id!.Value,
+      ClaimNo = claim.ClaimNo,
+      ClaimantId = claim.Owner.Id!.Value,
+      TransitId = claim.Transit.Id!.Value,
+      Status = StatusOf(claim.Status!.Value),
+      CompletionMode = claim.CompletionMode == null ? null : ModeOf(claim.CompletionMode.Value),
+      CreatedAt = claim.CreationDate,
+      CompletedAt = claim.CompletionDate,
+      Reason = claim.Reason,
+      IncidentDescription = claim.IncidentDescription
+    };
+  }
+
+  private static ClaimStatus StatusOf(Claim.Statuses status)
+  {
+    return status switch
+    {
+      Claim.Statuses.Draft => ClaimStatus.Draft,
+      Claim.Statuses.New => ClaimStatus.New,
+      Claim.Statuses.InProcess => ClaimStatus.InProcess,
+      Claim.Statuses.Refunded => ClaimStatus.Refunded,
+      _ => ClaimStatus.Escalated
+    };
+  }
+
+  private static ClaimCompletionMode ModeOf(Claim.CompletionModes mode)
+  {
+    return mode == Claim.CompletionModes.Automatic ? ClaimCompletionMode.Automatic : ClaimCompletionMode.Manual;
   }
 
   private void Send(string claimNo, Resolution resolution)
