@@ -9,8 +9,10 @@ public enum ClaimStatus
   Escalated
 }
 
+// Ordinals must match Claim.CompletionModes: the resolution Golden Master reads both /claims and
+// /bubble/claims into one type, and both serialize the enum as a number.
 public enum ClaimCompletionMode
 {
-  Automatic,
-  Manual
+  Manual,
+  Automatic
 }

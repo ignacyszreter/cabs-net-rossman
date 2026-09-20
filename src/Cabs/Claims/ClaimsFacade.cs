@@ -33,6 +33,10 @@ public class ClaimsFacade
     claim.CompletionMode = refunded ? ClaimCompletionMode.Automatic : ClaimCompletionMode.Manual;
     claim.CompletedAt = _clock.GetCurrentInstant();
     await _claims.SaveChangesAsync();
+
+    // Synchronous: resolving fails when the legacy model is down.
+    // A ClaimResolved event would cut this last dependency.
+    await _legacy.Apply(claimId, resolution);
     return ClaimView.Of(claim);
   }
 
