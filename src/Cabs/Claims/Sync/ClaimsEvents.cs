@@ -1,8 +1,23 @@
 using Mediator;
+using NodaTime;
 
 namespace LegacyFighter.Cabs.Claims.Sync;
 
 public record ClientTypeChanged(long ClientId, bool IsVip) : INotification;
+
+public record TransitOrdered(long TransitId, long ClientId) : INotification;
+
+public record TransitCompleted(long TransitId, long ClientId, long DriverId, int Fare) : INotification;
+
+public record ClaimRegistered(
+  long ClaimId,
+  string ClaimNo,
+  long ClaimantId,
+  long TransitId,
+  bool IsDraft,
+  Instant CreatedAt,
+  string Reason,
+  string? IncidentDescription) : INotification;
 
 public interface IClaimsEvents
 {

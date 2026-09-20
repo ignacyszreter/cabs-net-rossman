@@ -3,7 +3,10 @@ using Mediator;
 
 namespace LegacyFighter.Cabs.Claims.Sync;
 
-public class ClaimsCopy : INotificationHandler<ClientTypeChanged>
+public class ClaimsCopy :
+  INotificationHandler<ClientTypeChanged>,
+  INotificationHandler<TransitOrdered>,
+  INotificationHandler<TransitCompleted>
 {
   private readonly ClaimsDbContext _claims;
 
@@ -13,6 +16,16 @@ public class ClaimsCopy : INotificationHandler<ClientTypeChanged>
   }
 
   public ValueTask Handle(ClientTypeChanged notification, CancellationToken cancellationToken)
+  {
+    return ValueTask.CompletedTask;
+  }
+
+  public ValueTask Handle(TransitOrdered notification, CancellationToken cancellationToken)
+  {
+    return ValueTask.CompletedTask;
+  }
+
+  public ValueTask Handle(TransitCompleted notification, CancellationToken cancellationToken)
   {
     return ValueTask.CompletedTask;
   }

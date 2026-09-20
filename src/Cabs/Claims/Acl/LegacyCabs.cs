@@ -1,3 +1,4 @@
+using LegacyFighter.Cabs.Claims.Sync;
 using LegacyFighter.Cabs.Config;
 using LegacyFighter.Cabs.Dto;
 using LegacyFighter.Cabs.Entity;
@@ -18,6 +19,7 @@ public class LegacyCabs
   private readonly IClientNotificationService _clientNotifications;
   private readonly IDriverNotificationService _driverNotifications;
   private readonly IClock _clock;
+  private readonly IClaimsEvents _events;
 
   public LegacyCabs(
     IClaimRepository claims,
@@ -28,7 +30,8 @@ public class LegacyCabs
     IAwardsService awards,
     IClientNotificationService clientNotifications,
     IDriverNotificationService driverNotifications,
-    IClock clock)
+    IClock clock,
+    IClaimsEvents events)
   {
     _claims = claims;
     _clients = clients;
@@ -39,6 +42,7 @@ public class LegacyCabs
     _clientNotifications = clientNotifications;
     _driverNotifications = driverNotifications;
     _clock = clock;
+    _events = events;
   }
 
   public ClaimPolicy Policy()
@@ -91,7 +95,11 @@ public class LegacyCabs
     claim.Reason = newClaim.Reason;
     claim.IncidentDescription = newClaim.IncidentDescription;
     claim.Status = newClaim.IsDraft ? Claim.Statuses.Draft : Claim.Statuses.New;
-    return new ClaimDto(await _claims.Save(claim));
+    var registered = await _claims.Save(claim);
+    await _events.Publish(new ClaimRegistered(
+      registered.Id!.Value, registered.ClaimNo, owner.Id!.Value, transit.Id!.Value,
+      newClaim.IsDraft, registered.CreationDate, registered.Reason, registered.IncidentDescription));
+    return new ClaimDto(registered);
   }
 
   public async Task<ClaimDto> MarkInProcess(long claimId)

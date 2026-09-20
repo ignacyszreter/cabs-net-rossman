@@ -1,3 +1,4 @@
+using LegacyFighter.Cabs.Claims.Sync;
 using LegacyFighter.Cabs.Config;
 using LegacyFighter.Cabs.Dto;
 using LegacyFighter.Cabs.Entity;
@@ -17,8 +18,9 @@ public class ClaimService : IClaimService
   private readonly IAwardsService _awardsService;
   private readonly IClientNotificationService _clientNotificationService;
   private readonly IDriverNotificationService _driverNotificationService;
+  private readonly IClaimsEvents _events;
 
-  public ClaimService(IClock clock, IClientRepository clientRepository, ITransitRepository transitRepository, IClaimRepository claimRepository, ClaimNumberGenerator claimNumberGenerator, IAppProperties appProperties, IAwardsService awardsService, IClientNotificationService clientNotificationService, IDriverNotificationService driverNotificationService)
+  public ClaimService(IClock clock, IClientRepository clientRepository, ITransitRepository transitRepository, IClaimRepository claimRepository, ClaimNumberGenerator claimNumberGenerator, IAppProperties appProperties, IAwardsService awardsService, IClientNotificationService clientNotificationService, IDriverNotificationService driverNotificationService, IClaimsEvents events)
   {
     _clock = clock;
     _clientRepository = clientRepository;
@@ -29,6 +31,7 @@ public class ClaimService : IClaimService
     _awardsService = awardsService;
     _clientNotificationService = clientNotificationService;
     _driverNotificationService = driverNotificationService;
+    _events = events;
   }
 
   public async Task<Claim> Create(ClaimDto claimDto)
@@ -39,6 +42,9 @@ public class ClaimService : IClaimService
     };
     claim.ClaimNo = await _claimNumberGenerator.Generate(claim);
     claim = await Update(claimDto, claim);
+    await _events.Publish(new ClaimRegistered(
+      claim.Id!.Value, claim.ClaimNo, claim.Owner.Id!.Value, claim.Transit.Id!.Value,
+      claim.Status == Claim.Statuses.Draft, claim.CreationDate, claim.Reason, claim.IncidentDescription));
     return claim;
   }
 
