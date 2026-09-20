@@ -1,6 +1,7 @@
 using LegacyFighter.Cabs.Claims;
 using LegacyFighter.Cabs.Claims.Acl;
 using LegacyFighter.Cabs.Claims.Storage;
+using LegacyFighter.Cabs.Claims.Strangler;
 using LegacyFighter.Cabs.Claims.Sync;
 using LegacyFighter.Cabs.Common;
 using LegacyFighter.Cabs.Config;
@@ -101,6 +102,7 @@ builder.Services.AddTransient<ClaimsFacade>();
 builder.Services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped);
 builder.Services.AddTransient<IClaimsEvents, MediatorClaimsEvents>();
 builder.Services.AddTransient<ClaimsMigration>();
+builder.Services.AddSingleton(builder.Configuration.GetSection("Claims").Get<StranglerFlags>() ?? new StranglerFlags());
 builder.Services.AddControllers().AddControllersAsServices();
 
 var app = builder.Build();
@@ -114,6 +116,10 @@ using (var serviceScope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
+
+app.UseClaimsStrangler();
+
+app.UseRouting();
 
 app.UseAuthorization();
 
