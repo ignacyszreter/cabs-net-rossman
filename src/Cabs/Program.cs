@@ -1,3 +1,4 @@
+using LegacyFighter.Cabs.Claims;
 using LegacyFighter.Cabs.Claims.Acl;
 using LegacyFighter.Cabs.Claims.Storage;
 using LegacyFighter.Cabs.Claims.Sync;
@@ -96,6 +97,7 @@ builder.Services.AddTransient<AddressRepository>();
 builder.Services.AddTransient<LegacyCabs>();
 builder.Services.AddSingleton<ClaimsDatabase>();
 builder.Services.AddDbContext<ClaimsDbContext>();
+builder.Services.AddTransient<ClaimsFacade>();
 builder.Services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped);
 builder.Services.AddTransient<IClaimsEvents, MediatorClaimsEvents>();
 builder.Services.AddControllers().AddControllersAsServices();
